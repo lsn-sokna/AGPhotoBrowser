@@ -2,7 +2,7 @@
 //  ViewController.m
 //  AGPhotoBrowser
 //
-//  Created by Hellrider on 7/28/13.
+//  Created by Andrea Giavatto on 7/28/13.
 //  Copyright (c) 2013 Andrea Giavatto. All rights reserved.
 //
 
@@ -97,7 +97,7 @@
 #pragma mark - UITableView Delegate methods
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-	[self.browserView showFromIndex:indexPath.row];
+	[self.browserView showFromIndex:indexPath.row animated:YES];
 }
 
 
@@ -167,14 +167,14 @@
 {
 	// -- Dismiss
 	NSLog(@"Dismiss the photo browser here");
-	[self.browserView hideWithCompletion:^(BOOL finished){
+	[self.browserView hideAnimated:YES withCompletion:^(BOOL finished){
 		NSLog(@"Dismissed!");
 	}];
 }
 
 - (void)photoBrowser:(AGPhotoBrowserView *)photoBrowser didTapOnActionButton:(UIButton *)actionButton atIndex:(NSInteger)index
 {
-	NSLog(@"Action button tapped at index %d!", index);
+	NSLog(@"Action button tapped at index %ld!", (long)index);
 	UIActionSheet *action = [[UIActionSheet alloc] initWithTitle:@""
 														delegate:nil
 											   cancelButtonTitle:NSLocalizedString(@"Cancel", @"Cancel button")

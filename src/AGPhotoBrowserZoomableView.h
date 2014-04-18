@@ -2,7 +2,7 @@
 //  AGPhotoBrowserZoomableView.h
 //  AGPhotoBrowser
 //
-//  Created by Dimitris-Sotiris Tsolis on 24/11/13.
+//  Created by Andrea Giavatto on 24/11/13.
 //  Copyright (c) 2013 Andrea Giavatto. All rights reserved.
 //
 

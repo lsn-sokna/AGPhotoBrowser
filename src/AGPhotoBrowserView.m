@@ -2,7 +2,7 @@
 //  AGPhotoBrowserView.m
 //  AGPhotoBrowser
 //
-//  Created by Hellrider on 7/28/13.
+//  Created by Andrea Giavatto on 7/28/13.
 //  Copyright (c) 2013 Andrea Giavatto. All rights reserved.
 //
 
@@ -13,6 +13,7 @@
 #import "AGPhotoBrowserZoomableView.h"
 #import "AGPhotoBrowserCell.h"
 #import "AGPhotoBrowserCellProtocol.h"
+#import "UIView+Rotate.h"
 
 @interface AGPhotoBrowserView () <
 AGPhotoBrowserOverlayViewDelegate,
@@ -77,9 +78,28 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
                                                object:nil];
 }
 
+- (void)updateConstraints
+{
+	[self removeConstraints:self.constraints];
+	
+	NSDictionary *constrainedViews = NSDictionaryOfVariableBindings(_photoTableView);
+	// -- Horizontal constraints
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_photoTableView]|"
+																 options:0
+																 metrics:@{}
+																   views:constrainedViews]];
+	// -- Vertical constraints
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_photoTableView]|"
+																 options:0
+																 metrics:@{}
+																   views:constrainedViews]];
+	
+	[super updateConstraints];
+}
+
 - (void)dealloc
 {
-	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	[[NSNotificationCenter defaultCenter] removeObserver:self name:UIDeviceOrientationDidChangeNotification object:nil];
 }
 
 
@@ -108,8 +128,8 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
 - (UITableView *)photoTableView
 {
 	if (!_photoTableView) {
-		CGRect screenBounds = [[UIScreen mainScreen] bounds];
-		_photoTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetHeight(screenBounds), CGRectGetWidth(screenBounds))];
+		_photoTableView = [[UITableView alloc] initWithFrame:CGRectZero];
+		_photoTableView.translatesAutoresizingMaskIntoConstraints = NO;
 		_photoTableView.dataSource = self;
 		_photoTableView.delegate = self;
 		_photoTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
@@ -120,12 +140,7 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
 		_photoTableView.alpha = 0.;
 		
 		// -- Rotate table horizontally
-		CGAffineTransform rotateTable = CGAffineTransformMakeRotation(-M_PI_2);
-		CGPoint origin = _photoTableView.frame.origin;
-		_photoTableView.transform = rotateTable;
-		CGRect frame = _photoTableView.frame;
-		frame.origin = origin;
-		_photoTableView.frame = frame;
+		[_photoTableView AG_rotateRadians:-M_PI_2];
 	}
 	
 	return _photoTableView;
@@ -304,7 +319,13 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
 
 - (void)show
 {
-    self.previousWindow = [[UIApplication sharedApplication] keyWindow];
+    NSLog(@"This method has been deprecated and will be removed in a future release. Use showAnimated: instead.");
+	[self showAnimated:YES];
+}
+
+- (void)showAnimated:(BOOL)animated
+{
+	self.previousWindow = [[UIApplication sharedApplication] keyWindow];
     
     self.currentWindow = [[UIWindow alloc] initWithFrame:self.previousWindow.bounds];
     self.currentWindow.windowLevel = UIWindowLevelStatusBar;
@@ -313,7 +334,12 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
     [self.currentWindow makeKeyAndVisible];
     [self.currentWindow addSubview:self];
 	
-	[UIView animateWithDuration:AGPhotoBrowserAnimationDuration
+	NSTimeInterval animationDuration = AGPhotoBrowserAnimationDuration;
+	if (!animated) {
+		animationDuration = 0.f;
+	}
+	
+	[UIView animateWithDuration:animationDuration
 					 animations:^(){
 						 self.backgroundColor = [UIColor colorWithWhite:0. alpha:1.];
 					 }
@@ -329,16 +355,32 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
 
 - (void)showFromIndex:(NSInteger)initialIndex
 {
-	[self show];
+	NSLog(@"This method has been deprecated and will be removed in a future release. Use showFromIndex:animated: instead.");
+	[self showFromIndex:initialIndex animated:YES];
+}
+
+- (void)showFromIndex:(NSInteger)initialIndex animated:(BOOL)animated
+{
+	[self showAnimated:animated];
 	
 	if (initialIndex < [_dataSource numberOfPhotosForPhotoBrowser:self]) {
 		[self.photoTableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:initialIndex inSection:0] atScrollPosition:UITableViewScrollPositionMiddle animated:NO];
 	}
 }
 
-- (void)hideWithCompletion:( void (^) (BOOL finished) )completionBlock
+- (void)hideWithCompletion:(void(^)(BOOL finished))completionBlock
 {
-	[UIView animateWithDuration:AGPhotoBrowserAnimationDuration
+	NSLog(@"This method has been deprecated and will be removed in a future release. Use hideAnimated:withCompletion: instead.");
+	[self hideAnimated:YES withCompletion:completionBlock];
+}
+
+- (void)hideAnimated:(BOOL)animated withCompletion:(void (^)(BOOL))completionBlock
+{
+	NSTimeInterval animationDuration = AGPhotoBrowserAnimationDuration;
+	if (!animated) {
+		animationDuration = 0.f;
+	}
+	[UIView animateWithDuration:animationDuration
 					 animations:^(){
 						 self.photoTableView.alpha = 0.;
 						 self.backgroundColor = [UIColor colorWithWhite:0. alpha:0.];
@@ -414,7 +456,7 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
 		} else {
 			// -- Animate out!
 			typeof(self) weakSelf __weak = self;
-			[self hideWithCompletion:^(BOOL finished){
+			[self hideAnimated:YES withCompletion:^(BOOL finished){
 				typeof(weakSelf) strongSelf __strong = weakSelf;
 				if (strongSelf) {
 					imageView.center = strongSelf->_startingPanPoint;

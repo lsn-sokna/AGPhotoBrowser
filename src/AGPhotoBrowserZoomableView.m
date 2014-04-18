@@ -2,7 +2,7 @@
 //  AGPhotoBrowserZoomableView.m
 //  AGPhotoBrowser
 //
-//  Created by Dimitris-Sotiris Tsolis on 24/11/13.
+//  Created by Andrea Giavatto Tsolis on 24/11/13.
 //  Copyright (c) 2013 Andrea Giavatto. All rights reserved.
 //
 
@@ -77,7 +77,7 @@
 
 #pragma mark - UIScrollViewDelegate
 
-- (void)scrollViewDidEndZooming:(UIScrollView *)scrollView withView:(UIView *)view atScale:(float)scale
+- (void)scrollViewDidEndZooming:(UIScrollView *)scrollView withView:(UIView *)view atScale:(CGFloat)scale
 {
 }
 
