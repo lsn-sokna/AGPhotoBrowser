@@ -42,76 +42,9 @@
     return self;
 }
 
-- (void)layoutSubviews
-{
-	[super layoutSubviews];
-    
-    // -- Gradient layer
-    _gradientLayer.frame = self.bounds;
-    // -- Sharing view
-    self.sharingView.frame = CGRectMake(0, 0, CGRectGetWidth(self.bounds), CGRectGetHeight(self.bounds));
-	// -- Title
-    self.titleLabel.frame = CGRectMake(20, 30, CGRectGetWidth(self.bounds) - 40, 20);
-	// -- Separator
-    self.separatorView.frame = CGRectMake(20, CGRectGetMinY(self.titleLabel.frame) + CGRectGetHeight(self.titleLabel.frame), CGRectGetWidth(self.titleLabel.frame), 1);
-    // -- Action
-    self.actionButton.frame = CGRectMake(CGRectGetWidth(self.bounds) - 55 - 5, CGRectGetHeight(self.bounds) - 32 - 5, 55, 32);
-    // -- See more
-	self.seeMoreButton.frame = CGRectMake(CGRectGetWidth(self.bounds) - CGRectGetWidth(self.actionButton.frame) - 60 - 5, CGRectGetMinY(self.separatorView.frame) + CGRectGetHeight(self.separatorView.frame) + 5, 60, 20);
-    // -- Description
-    CGSize descriptionSize = [self p_sizeForDescriptionLabel];
-    CGFloat descriptionHeight = 20;
-	if (self.descriptionExpanded) {
-		descriptionHeight = descriptionSize.height;
-	}
-    self.descriptionLabel.frame = CGRectMake(20, CGRectGetMinY(self.separatorView.frame) + CGRectGetHeight(self.separatorView.frame) + 5, descriptionSize.width, descriptionHeight);
-    
-    // -- Controls visibility
-	if ([self.descriptionLabel.text length]) {
-        self.descriptionLabel.hidden = NO;
-        if (self.descriptionExpanded) {
-            self.seeMoreButton.hidden = YES;
-        } else {
-            CGSize descriptionTextSize;
-            if (floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_6_1) {
-                descriptionTextSize = [self.descriptionLabel.text sizeWithFont:self.descriptionLabel.font  constrainedToSize:CGSizeMake(descriptionSize.width, MAXFLOAT)];
-            } else {
-                NSDictionary *textAttributes = @{NSFontAttributeName : self.descriptionLabel.font};
-                CGRect descriptionBoundingRect = [self.descriptionLabel.text boundingRectWithSize:CGSizeMake(descriptionSize.width, MAXFLOAT)
-                                                                                          options:NSStringDrawingUsesLineFragmentOrigin|NSStringDrawingUsesFontLeading attributes:textAttributes
-                                                                                          context:nil];
-                descriptionTextSize = CGSizeMake(ceil(CGRectGetWidth(descriptionBoundingRect)), ceil(CGRectGetHeight(descriptionBoundingRect)));
-            }
-            if (descriptionTextSize.height > CGRectGetHeight(self.descriptionLabel.frame)) {
-                self.seeMoreButton.hidden = NO;
-            } else {
-                self.seeMoreButton.hidden = YES;
-            }
-        }
-    } else {
-        self.descriptionLabel.hidden = YES;
-        self.seeMoreButton.hidden = YES;
-    }
-	
-    if ([_title length]) {
-		self.titleLabel.hidden = NO;
-		self.separatorView.hidden = NO;
-	} else {
-		self.titleLabel.hidden = YES;
-		self.separatorView.hidden = YES;
-	}
-    
-    if (![_description length] && ![_title length]) {
-        _gradientLayer.hidden = YES;
-    } else {
-        _gradientLayer.hidden = NO;
-    }
-}
-
 - (void)setupView
 {
 	self.alpha = 0;
-	self.userInteractionEnabled = YES;
     
 	[self.sharingView addSubview:self.titleLabel];
 	[self.sharingView addSubview:self.separatorView];
@@ -121,6 +54,95 @@
 	
 	[self addSubview:self.sharingView];
 }
+
+- (void)updateConstraints
+{
+	[self removeConstraints:self.constraints];
+	
+	NSDictionary *constrainedViews = NSDictionaryOfVariableBindings(_sharingView, _titleLabel, _separatorView, _descriptionLabel);
+	NSDictionary *metrics = @{
+							  @"SharingViewHeight" : @(100)
+							  };
+	
+	// -- Horizontal constraints
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_sharingView]|" options:0 metrics:metrics views:constrainedViews]];
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(==20)-[_titleLabel]-(==20)-|" options:0 metrics:metrics views:constrainedViews]];
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(==20)-[_separatorView]-(==20)-|" options:0 metrics:metrics views:constrainedViews]];
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(==20)-[_descriptionLabel]-(==20)-|" options:0 metrics:metrics views:constrainedViews]];
+	// -- Vertical constraints
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(>=0)-[_sharingView(==SharingViewHeight)]|" options:0 metrics:metrics views:constrainedViews]];
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(==30)-[_titleLabel(==20)][_separatorView(==1)]-[_descriptionLabel(>=20)]-(>=0)-|" options:0 metrics:metrics views:constrainedViews]];
+	
+	[super updateConstraints];
+}
+
+//- (void)layoutSubviews
+//{
+//	[super layoutSubviews];
+//    
+//    // -- Gradient layer
+//    _gradientLayer.frame = self.bounds;
+//    // -- Sharing view
+//    self.sharingView.frame = CGRectMake(0, 0, CGRectGetWidth(self.bounds), CGRectGetHeight(self.bounds));
+//	// -- Title
+//    self.titleLabel.frame = CGRectMake(20, 30, CGRectGetWidth(self.bounds) - 40, 20);
+//	// -- Separator
+//    self.separatorView.frame = CGRectMake(20, CGRectGetMinY(self.titleLabel.frame) + CGRectGetHeight(self.titleLabel.frame), CGRectGetWidth(self.titleLabel.frame), 1);
+//    // -- Action
+//    self.actionButton.frame = CGRectMake(CGRectGetWidth(self.bounds) - 55 - 5, CGRectGetHeight(self.bounds) - 32 - 5, 55, 32);
+//    // -- See more
+//	self.seeMoreButton.frame = CGRectMake(CGRectGetWidth(self.bounds) - CGRectGetWidth(self.actionButton.frame) - 60 - 5, CGRectGetMinY(self.separatorView.frame) + CGRectGetHeight(self.separatorView.frame) + 5, 60, 20);
+//    // -- Description
+//    CGSize descriptionSize = [self p_sizeForDescriptionLabel];
+//    CGFloat descriptionHeight = 20;
+//	if (self.descriptionExpanded) {
+//		descriptionHeight = descriptionSize.height;
+//	}
+//    self.descriptionLabel.frame = CGRectMake(20, CGRectGetMinY(self.separatorView.frame) + CGRectGetHeight(self.separatorView.frame) + 5, descriptionSize.width, descriptionHeight);
+//    
+//    // -- Controls visibility
+//	if ([self.descriptionLabel.text length]) {
+//        self.descriptionLabel.hidden = NO;
+//        if (self.descriptionExpanded) {
+//            self.seeMoreButton.hidden = YES;
+//        } else {
+//            CGSize descriptionTextSize;
+//            if (floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_6_1) {
+//                descriptionTextSize = [self.descriptionLabel.text sizeWithFont:self.descriptionLabel.font  constrainedToSize:CGSizeMake(descriptionSize.width, MAXFLOAT)];
+//            } else {
+//                NSDictionary *textAttributes = @{NSFontAttributeName : self.descriptionLabel.font};
+//                CGRect descriptionBoundingRect = [self.descriptionLabel.text boundingRectWithSize:CGSizeMake(descriptionSize.width, MAXFLOAT)
+//                                                                                          options:NSStringDrawingUsesLineFragmentOrigin|NSStringDrawingUsesFontLeading attributes:textAttributes
+//                                                                                          context:nil];
+//                descriptionTextSize = CGSizeMake(ceil(CGRectGetWidth(descriptionBoundingRect)), ceil(CGRectGetHeight(descriptionBoundingRect)));
+//            }
+//            if (descriptionTextSize.height > CGRectGetHeight(self.descriptionLabel.frame)) {
+//                self.seeMoreButton.hidden = NO;
+//            } else {
+//                self.seeMoreButton.hidden = YES;
+//            }
+//        }
+//    } else {
+//        self.descriptionLabel.hidden = YES;
+//        self.seeMoreButton.hidden = YES;
+//    }
+//	
+//    if ([_title length]) {
+//		self.titleLabel.hidden = NO;
+//		self.separatorView.hidden = NO;
+//	} else {
+//		self.titleLabel.hidden = YES;
+//		self.separatorView.hidden = YES;
+//	}
+//    
+//    if (![_description length] && ![_title length]) {
+//        _gradientLayer.hidden = YES;
+//    } else {
+//        _gradientLayer.hidden = NO;
+//    }
+//}
+
+
 
 
 #pragma mark - Public methods
@@ -155,7 +177,6 @@
 
 
 #pragma mark - Private methods
-#pragma mark -
 
 - (CGSize)p_sizeForDescriptionLabel
 {
@@ -231,6 +252,17 @@
 }
 
 
+#pragma mark - Overrides
+
+- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
+{
+	if ([self.sharingView pointInside:point withEvent:event]) {
+        return self.sharingView;
+    }
+    return nil;
+}
+
+
 #pragma mark - Setters
 
 - (void)setFrame:(CGRect)frame
@@ -288,10 +320,13 @@
 {
 	if (!_sharingView) {
 		_sharingView = [[UIView alloc] initWithFrame:CGRectZero];
-        _gradientLayer = [CAGradientLayer layer];
-		_gradientLayer.frame = self.bounds;
-		_gradientLayer.colors = [NSArray arrayWithObjects:(id)[[UIColor clearColor] CGColor], (id)[[UIColor blackColor] CGColor], nil];
-		[_sharingView.layer insertSublayer:_gradientLayer atIndex:0];
+		_sharingView.translatesAutoresizingMaskIntoConstraints = NO;
+		_sharingView.alpha = 1.;
+		_sharingView.backgroundColor = [UIColor redColor];
+//        _gradientLayer = [CAGradientLayer layer];
+//		_gradientLayer.frame = self.bounds;
+//		_gradientLayer.colors = [NSArray arrayWithObjects:(id)[[UIColor clearColor] CGColor], (id)[[UIColor blackColor] CGColor], nil];
+//		[_sharingView.layer insertSublayer:_gradientLayer atIndex:0];
 	}
 	
 	return _sharingView;
@@ -301,6 +336,7 @@
 {
 	if (!_titleLabel) {
 		_titleLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+		_titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
 		_titleLabel.textColor = [UIColor colorWithWhite:0.9 alpha:0.9];
 		_titleLabel.font = [UIFont boldSystemFontOfSize:14];
 		_titleLabel.backgroundColor = [UIColor clearColor];
@@ -313,6 +349,7 @@
 {
 	if (!_separatorView) {
 		_separatorView = [[UIView alloc] initWithFrame:CGRectZero];
+		_separatorView.translatesAutoresizingMaskIntoConstraints = NO;
 		_separatorView.backgroundColor = [UIColor lightGrayColor];
         _separatorView.hidden = YES;
 	}
@@ -324,6 +361,7 @@
 {
 	if (!_descriptionLabel) {
 		_descriptionLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+		_descriptionLabel.translatesAutoresizingMaskIntoConstraints = NO;
 		_descriptionLabel.textColor = [UIColor colorWithWhite:0.9 alpha:0.9];
 		_descriptionLabel.font = [UIFont systemFontOfSize:13];
 		_descriptionLabel.backgroundColor = [UIColor clearColor];

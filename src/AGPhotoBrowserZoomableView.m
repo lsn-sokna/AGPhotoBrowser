@@ -22,17 +22,12 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
-		self.translatesAutoresizingMaskIntoConstraints = NO;
         self.delegate = self;
-        self.imageView = [[UIImageView alloc] initWithFrame:frame];
-        self.imageView.contentMode = UIViewContentModeScaleAspectFit;
-        self.imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         
         self.minimumZoomScale = 1.0f;
-        self.maximumZoomScale = 5.0f;
+        self.maximumZoomScale = 3.0f;
         
         [self addGestureRecognizer:self.tapGesture];
-        
         [self addSubview:self.imageView];
     }
     return self;
@@ -49,6 +44,17 @@
 	}
 	
 	return _tapGesture;
+}
+
+- (UIImageView *)imageView
+{
+	if (!_imageView) {
+		_imageView = [[UIImageView alloc] initWithFrame:self.frame];
+        _imageView.contentMode = UIViewContentModeScaleAspectFit;
+        _imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+	}
+	
+	return _imageView;
 }
 
 

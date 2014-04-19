@@ -29,6 +29,12 @@
 	return self;
 }
 
+- (void)setupCell
+{
+    self.contentView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+	[self.contentView addSubview:self.zoomableView];
+}
+
 - (void)updateConstraints
 {
 	[self.contentView removeConstraints:self.contentView.constraints];
@@ -72,6 +78,7 @@
 {
 	if (!_zoomableView) {
 		_zoomableView = [[AGPhotoBrowserZoomableView alloc] initWithFrame:CGRectZero];
+		_zoomableView.translatesAutoresizingMaskIntoConstraints = NO;
 		_zoomableView.userInteractionEnabled = YES;
         _zoomableView.zoomableDelegate = self;
 		
@@ -132,12 +139,6 @@
 
 
 #pragma mark - Private methods
-
-- (void)setupCell
-{
-    self.contentView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-	[self.contentView addSubview:self.zoomableView];
-}
 
 - (void)p_imageViewPanned:(UIPanGestureRecognizer *)recognizer
 {

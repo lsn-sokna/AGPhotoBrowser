@@ -13,7 +13,6 @@
 #import "AGPhotoBrowserZoomableView.h"
 #import "AGPhotoBrowserCell.h"
 #import "AGPhotoBrowserCellProtocol.h"
-#import "UIView+Rotate.h"
 
 @interface AGPhotoBrowserView () <
 AGPhotoBrowserOverlayViewDelegate,
@@ -30,7 +29,7 @@ UIGestureRecognizerDelegate
 
 @property (nonatomic, strong, readwrite) UIButton *doneButton;
 @property (nonatomic, strong) UITableView *photoTableView;
-@property (nonatomic, strong) AGPhotoBrowserOverlayView *overlayView;
+//@property (nonatomic, strong) AGPhotoBrowserOverlayView *overlayView;
 
 @property (nonatomic, strong) UIWindow *previousWindow;
 @property (nonatomic, strong) UIWindow *currentWindow;
@@ -67,7 +66,7 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
 	
 	[self addSubview:self.photoTableView];
 	[self addSubview:self.doneButton];
-	[self addSubview:self.overlayView];
+//	[self addSubview:self.overlayView];
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(statusBarDidChangeFrame:)
@@ -79,25 +78,13 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
 {
 	[self removeConstraints:self.constraints];
 	
-	NSDictionary *constrainedViews = NSDictionaryOfVariableBindings(_photoTableView, _doneButton);
+	NSDictionary *constrainedViews = NSDictionaryOfVariableBindings(_photoTableView/*, _overlayView*/);
 	// -- Horizontal constraints
-	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_photoTableView]|"
-																 options:0
-																 metrics:@{}
-																   views:constrainedViews]];
-	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(>=0)-[_doneButton(==DoneButtonWidth)]-(==10)-|"
-																 options:0
-																 metrics:@{@"DoneButtonWidth" : @(60)}
-																   views:constrainedViews]];
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_photoTableView]|" options:0 metrics:@{} views:constrainedViews]];
+//	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_overlayView]|" options:0	 metrics:@{} views:constrainedViews]];
 	// -- Vertical constraints
-	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_photoTableView]|"
-																 options:0
-																 metrics:@{}
-																   views:constrainedViews]];
-	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(==20)-[_doneButton(==DoneButtonHeight)]-(>=0)-|"
-																 options:0
-																 metrics:@{@"DoneButtonHeight" : @(32)}
-																   views:constrainedViews]];
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_photoTableView]|" options:0 metrics:@{} views:constrainedViews]];
+//	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_overlayView]|" options:0	 metrics:@{} views:constrainedViews]];
 	
 	[super updateConstraints];
 }
@@ -144,23 +131,21 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
 		_photoTableView.showsVerticalScrollIndicator = NO;
 		_photoTableView.showsHorizontalScrollIndicator = NO;
 		_photoTableView.alpha = 0.;
-		
-		// -- Rotate table horizontally
-		[_photoTableView AG_rotateRadians:-M_PI_2];
 	}
 	
 	return _photoTableView;
 }
 
-- (AGPhotoBrowserOverlayView *)overlayView
-{
-	if (!_overlayView) {
-		_overlayView = [[AGPhotoBrowserOverlayView alloc] initWithFrame:CGRectZero];
-        _overlayView.delegate = self;
-	}
-	
-	return _overlayView;
-}
+//- (AGPhotoBrowserOverlayView *)overlayView
+//{
+//	if (!_overlayView) {
+//		_overlayView = [[AGPhotoBrowserOverlayView alloc] initWithFrame:CGRectZero];
+//		_overlayView.translatesAutoresizingMaskIntoConstraints = NO;
+//        _overlayView.delegate = self;
+//	}
+//	
+//	return _overlayView;
+//}
 
 - (CGFloat)cellHeight
 {
@@ -182,10 +167,10 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
 	CGFloat newAlpha;
 	
 	if (_displayingDetailedView) {
-		[self.overlayView setOverlayVisible:YES animated:YES];
+//		[self.overlayView setOverlayVisible:YES animated:YES];
 		newAlpha = 1.;
 	} else {
-		[self.overlayView setOverlayVisible:NO animated:YES];
+//		[self.overlayView setOverlayVisible:NO animated:YES];
 		newAlpha = 0.;
 	}
 	
@@ -244,7 +229,7 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
 {
 	if ([_dataSource respondsToSelector:@selector(photoBrowser:shouldDisplayOverlayViewAtIndex:)]) {
 		BOOL overlayIsVisible = [_dataSource photoBrowser:self shouldDisplayOverlayViewAtIndex:indexPath.row];
-		self.overlayView.hidden = !overlayIsVisible;
+//		self.overlayView.hidden = !overlayIsVisible;
 	}
 	
     if ([cell respondsToSelector:@selector(resetZoomScale)]) {
@@ -257,7 +242,7 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
         [cell setCellImage:[_dataSource photoBrowser:self imageAtIndex:indexPath.row]];
     }
 	
-	[self.overlayView resetOverlayView];
+//	[self.overlayView resetOverlayView];
 }
 
 
@@ -292,7 +277,7 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
     if (!self.currentWindow.hidden && !_changingOrientation) {
-        [self.overlayView resetOverlayView];
+//        [self.overlayView resetOverlayView];
         
         CGPoint targetContentOffset = scrollView.contentOffset;
         
@@ -308,21 +293,21 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
     _currentlySelectedIndex = index;
 	    
     if ([self.dataSource respondsToSelector:@selector(photoBrowser:willDisplayActionButtonAtIndex:)]) {
-        self.overlayView.actionButton.hidden = ![self.dataSource photoBrowser:self willDisplayActionButtonAtIndex:_currentlySelectedIndex];
+//        self.overlayView.actionButton.hidden = ![self.dataSource photoBrowser:self willDisplayActionButtonAtIndex:_currentlySelectedIndex];
     } else {
-        self.overlayView.actionButton.hidden = NO;
+//        self.overlayView.actionButton.hidden = NO;
     }
     
 	if ([_dataSource respondsToSelector:@selector(photoBrowser:titleForImageAtIndex:)]) {
-		self.overlayView.title = [_dataSource photoBrowser:self titleForImageAtIndex:_currentlySelectedIndex];
+//		self.overlayView.title = [_dataSource photoBrowser:self titleForImageAtIndex:_currentlySelectedIndex];
 	} else {
-        self.overlayView.title = @"";
+//        self.overlayView.title = @"";
     }
 	
 	if ([_dataSource respondsToSelector:@selector(photoBrowser:descriptionForImageAtIndex:)]) {
-		self.overlayView.description = [_dataSource photoBrowser:self descriptionForImageAtIndex:_currentlySelectedIndex];
+//		self.overlayView.description = [_dataSource photoBrowser:self descriptionForImageAtIndex:_currentlySelectedIndex];
 	} else {
-        self.overlayView.description = @"";
+//        self.overlayView.description = @"";
     }
 }
 
@@ -527,28 +512,29 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
 		CGRect doneFrame = CGRectZero;
 		
 		// -- Update table
-		[self setTransform:tableTransform andFrame:tableFrame forView:self.photoTableView];
+		[self setTransform:tableTransform andFrame:tableFrame forView:self];
+		[self setNeedsUpdateConstraints];
 		
 		if (UIDeviceOrientationIsPortrait(orientation) || orientation == UIDeviceOrientationFaceUp) {
-			overlayFrame = CGRectMake(0, CGRectGetHeight(tableFrame) - AGPhotoBrowserOverlayInitialHeight, CGRectGetWidth(tableFrame), AGPhotoBrowserOverlayInitialHeight);
-			doneFrame = CGRectMake(CGRectGetWidth(tableFrame) - 60 - 10, 15, 60, 32);
+//			overlayFrame = CGRectMake(0, CGRectGetHeight(tableFrame) - AGPhotoBrowserOverlayInitialHeight, CGRectGetWidth(tableFrame), AGPhotoBrowserOverlayInitialHeight);
+//			doneFrame = CGRectMake(CGRectGetWidth(tableFrame) - 60 - 10, 15, 60, 32);
 		} else if (orientation == UIDeviceOrientationLandscapeLeft) {
-			overlayFrame = CGRectMake(0, 0, AGPhotoBrowserOverlayInitialHeight, CGRectGetHeight(tableFrame));
-			doneFrame = CGRectMake(CGRectGetWidth(tableFrame) - 32 - 15, CGRectGetHeight(tableFrame) - 10 - 60, 32, 60);
+//			overlayFrame = CGRectMake(0, 0, AGPhotoBrowserOverlayInitialHeight, CGRectGetHeight(tableFrame));
+//			doneFrame = CGRectMake(CGRectGetWidth(tableFrame) - 32 - 15, CGRectGetHeight(tableFrame) - 10 - 60, 32, 60);
 		} else {
-			overlayFrame = CGRectMake(CGRectGetWidth(tableFrame) - AGPhotoBrowserOverlayInitialHeight, 0, AGPhotoBrowserOverlayInitialHeight, CGRectGetHeight(tableFrame));
-			doneFrame = CGRectMake(15, 10, 32, 60);
+//			overlayFrame = CGRectMake(CGRectGetWidth(tableFrame) - AGPhotoBrowserOverlayInitialHeight, 0, AGPhotoBrowserOverlayInitialHeight, CGRectGetHeight(tableFrame));
+//			doneFrame = CGRectMake(15, 10, 32, 60);
 		}
 		// -- Update overlay
-		[self setTransform:overlayTransform andFrame:overlayFrame forView:self.overlayView];
-		if (self.overlayView.descriptionExpanded) {
-			[self.overlayView resetOverlayView];
-		}
+//		[self setTransform:overlayTransform andFrame:overlayFrame forView:self.overlayView];
+//		if (self.overlayView.descriptionExpanded) {
+//			[self.overlayView resetOverlayView];
+//		}
 		// -- Update done button
-		[self setTransform:overlayTransform andFrame:doneFrame forView:self.doneButton];
+//		[self setTransform:overlayTransform andFrame:doneFrame forView:self.doneButton];
 		
-		[self.photoTableView reloadData];
-		[self.photoTableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:_currentlySelectedIndex inSection:0] atScrollPosition:UITableViewScrollPositionNone animated:NO];
+//		[self.photoTableView reloadData];
+//		[self.photoTableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:_currentlySelectedIndex inSection:0] atScrollPosition:UITableViewScrollPositionNone animated:NO];
 
 		_changingOrientation = NO;
 	}
