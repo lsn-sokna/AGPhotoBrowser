@@ -8,6 +8,7 @@
 
 #import "AGPhotoBrowserCell.h"
 #import "AGPhotoBrowserZoomableView.h"
+#import "UIView+Rotate.h"
 
 @interface AGPhotoBrowserCell () <AGPhotoBrowserZoomableViewDelegate>
 
@@ -70,18 +71,12 @@
 - (AGPhotoBrowserZoomableView *)zoomableView
 {
 	if (!_zoomableView) {
-		_zoomableView = [[AGPhotoBrowserZoomableView alloc] initWithFrame:[UIScreen mainScreen].bounds];
+		_zoomableView = [[AGPhotoBrowserZoomableView alloc] initWithFrame:CGRectZero];
 		_zoomableView.userInteractionEnabled = YES;
         _zoomableView.zoomableDelegate = self;
 		
 		[_zoomableView addGestureRecognizer:self.panGesture];
-        
-		CGAffineTransform transform = CGAffineTransformMakeRotation(M_PI_2);
-		CGPoint origin = _zoomableView.frame.origin;
-		_zoomableView.transform = transform;
-        CGRect frame = _zoomableView.frame;
-        frame.origin = origin;
-        _zoomableView.frame = frame;
+		[_zoomableView AG_rotateRadians:M_PI_2];
 	}
 	
 	return _zoomableView;
@@ -108,7 +103,7 @@
         UIView *imageView = [gestureRecognizer view];
         CGPoint translation = [gestureRecognizer translationInView:[imageView superview]];
         
-        // -- Check for horizontal gesture
+        // -- Check for movement axis
         if (fabsf(translation.x) > fabsf(translation.y)) {
             return YES;
         }

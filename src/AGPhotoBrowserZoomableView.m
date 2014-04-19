@@ -2,7 +2,7 @@
 //  AGPhotoBrowserZoomableView.m
 //  AGPhotoBrowser
 //
-//  Created by Andrea Giavatto Tsolis on 24/11/13.
+//  Created by Andrea Giavatto on 24/11/13.
 //  Copyright (c) 2013 Andrea Giavatto. All rights reserved.
 //
 
@@ -12,6 +12,7 @@
 @interface AGPhotoBrowserZoomableView ()
 
 @property (nonatomic, strong, readwrite) UIImageView *imageView;
+@property (nonatomic, strong) UITapGestureRecognizer *tapGesture;
 
 @end
 
@@ -30,14 +31,24 @@
         self.minimumZoomScale = 1.0f;
         self.maximumZoomScale = 5.0f;
         
-        UITapGestureRecognizer *doubleTap = [[UITapGestureRecognizer alloc] initWithTarget:self
-                                                                                    action:@selector(doubleTapped:)];
-        doubleTap.numberOfTapsRequired = 2;
-        [self addGestureRecognizer:doubleTap];
+        [self addGestureRecognizer:self.tapGesture];
         
         [self addSubview:self.imageView];
     }
     return self;
+}
+
+
+#pragma mark - Getters
+
+- (UITapGestureRecognizer *)tapGesture
+{
+	if (!_tapGesture) {
+		_tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(p_imageTapped:)];
+		_tapGesture.numberOfTapsRequired = 2;
+	}
+	
+	return _tapGesture;
 }
 
 
@@ -59,16 +70,16 @@
 }
 
 
-#pragma mark - Recognizer
+#pragma mark - Private methods
 
-- (void)doubleTapped:(UITapGestureRecognizer *)recognizer
+- (void)p_imageTapped:(UITapGestureRecognizer *)recognizer
 {
     if (self.zoomScale > 1.0f) {
-        [UIView animateWithDuration:0.35 animations:^{
+        [UIView animateWithDuration:0.25 animations:^{
             self.zoomScale = 1.0f;
         }];
     } else {
-        [UIView animateWithDuration:0.35 animations:^{
+        [UIView animateWithDuration:0.25 animations:^{
             CGPoint point = [recognizer locationInView:self];
             [self zoomToRect:CGRectMake(point.x, point.y, 0, 0) animated:YES];
         }];

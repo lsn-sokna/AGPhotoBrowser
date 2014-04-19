@@ -218,15 +218,15 @@
 		DE48791517CA84740048D0FC /* src */ = {
 			isa = PBXGroup;
 			children = (
+				DE13F9EA1879A23A00449C49 /* AGPhotoBrowserCell.h */,
+				DE13F9EB1879A23A00449C49 /* AGPhotoBrowserCell.m */,
+				A25C8828187AEB600097C690 /* AGPhotoBrowserCellProtocol.h */,
 				DE48791617CA84740048D0FC /* AGPhotoBrowserDataSource.h */,
 				DE48791717CA84740048D0FC /* AGPhotoBrowserDelegate.h */,
 				DE48791817CA84740048D0FC /* AGPhotoBrowserOverlayView.h */,
 				DE48791917CA84740048D0FC /* AGPhotoBrowserOverlayView.m */,
 				DE48791A17CA84740048D0FC /* AGPhotoBrowserView.h */,
 				DE48791B17CA84740048D0FC /* AGPhotoBrowserView.m */,
-				A25C8828187AEB600097C690 /* AGPhotoBrowserCellProtocol.h */,
-				DE13F9EA1879A23A00449C49 /* AGPhotoBrowserCell.h */,
-				DE13F9EB1879A23A00449C49 /* AGPhotoBrowserCell.m */,
 				8D3D8ABA184202DE00154B6B /* AGPhotoBrowserZoomableView.h */,
 				8D3D8ABB184202DE00154B6B /* AGPhotoBrowserZoomableView.m */,
 				DEFE659719014A70005B6DFE /* UIView+Rotate.h */,

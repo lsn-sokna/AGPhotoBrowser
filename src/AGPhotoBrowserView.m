@@ -23,9 +23,6 @@ UITableViewDelegate,
 UIGestureRecognizerDelegate
 > {
 	CGPoint _startingPanPoint;
-	BOOL _wantedFullscreenLayout;
-    BOOL _navigationBarWasHidden;
-	CGRect _originalParentViewFrame;
 	NSInteger _currentlySelectedIndex;
     
     BOOL _changingOrientation;
@@ -82,16 +79,24 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
 {
 	[self removeConstraints:self.constraints];
 	
-	NSDictionary *constrainedViews = NSDictionaryOfVariableBindings(_photoTableView);
+	NSDictionary *constrainedViews = NSDictionaryOfVariableBindings(_photoTableView, _doneButton);
 	// -- Horizontal constraints
 	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_photoTableView]|"
 																 options:0
 																 metrics:@{}
 																   views:constrainedViews]];
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(>=0)-[_doneButton(==DoneButtonWidth)]-(==10)-|"
+																 options:0
+																 metrics:@{@"DoneButtonWidth" : @(60)}
+																   views:constrainedViews]];
 	// -- Vertical constraints
 	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_photoTableView]|"
 																 options:0
 																 metrics:@{}
+																   views:constrainedViews]];
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(==20)-[_doneButton(==DoneButtonHeight)]-(>=0)-|"
+																 options:0
+																 metrics:@{@"DoneButtonHeight" : @(32)}
 																   views:constrainedViews]];
 	
 	[super updateConstraints];
@@ -108,7 +113,8 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
 - (UIButton *)doneButton
 {
 	if (!_doneButton) {
-		_doneButton = [[UIButton alloc] initWithFrame:CGRectMake(CGRectGetWidth([UIScreen mainScreen].bounds) - 60 - 10, 20, 60, 32)];
+		_doneButton = [[UIButton alloc] initWithFrame:CGRectZero];
+		_doneButton.translatesAutoresizingMaskIntoConstraints = NO;
 		[_doneButton setTitle:NSLocalizedString(@"Done", @"Title for Done button") forState:UIControlStateNormal];
 		_doneButton.layer.cornerRadius = 3.0f;
 		_doneButton.layer.borderColor = [UIColor colorWithWhite:0.9 alpha:0.9].CGColor;
@@ -230,22 +236,28 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
     }
 
     [self configureCell:cell forRowAtIndexPath:indexPath];
-    [self.overlayView resetOverlayView];
     
     return cell;
 }
 
 - (void)configureCell:(UITableViewCell<AGPhotoBrowserCellProtocol> *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
 {
+	if ([_dataSource respondsToSelector:@selector(photoBrowser:shouldDisplayOverlayViewAtIndex:)]) {
+		BOOL overlayIsVisible = [_dataSource photoBrowser:self shouldDisplayOverlayViewAtIndex:indexPath.row];
+		self.overlayView.hidden = !overlayIsVisible;
+	}
+	
     if ([cell respondsToSelector:@selector(resetZoomScale)]) {
         [cell resetZoomScale];
     }
     
     if ([_dataSource respondsToSelector:@selector(photoBrowser:URLStringForImageAtIndex:)] && [cell respondsToSelector:@selector(setCellImageWithURL:)]) {
         [cell setCellImageWithURL:[NSURL URLWithString:[_dataSource photoBrowser:self URLStringForImageAtIndex:indexPath.row]]];
-    } else {
+    } else if ([_dataSource respondsToSelector:@selector(photoBrowser:imageAtIndex:)]) {
         [cell setCellImage:[_dataSource photoBrowser:self imageAtIndex:indexPath.row]];
     }
+	
+	[self.overlayView resetOverlayView];
 }
 
 
