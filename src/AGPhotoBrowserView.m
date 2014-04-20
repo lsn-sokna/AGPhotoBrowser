@@ -23,8 +23,6 @@ UIGestureRecognizerDelegate
 > {
 	CGPoint _startingPanPoint;
 	NSInteger _currentlySelectedIndex;
-    
-    BOOL _changingOrientation;
 }
 
 @property (nonatomic, strong, readwrite) UIButton *doneButton;
@@ -34,8 +32,8 @@ UIGestureRecognizerDelegate
 @property (nonatomic, strong) UIWindow *previousWindow;
 @property (nonatomic, strong) UIWindow *currentWindow;
 
+@property (atomic, assign) BOOL changingOrientation;
 @property (nonatomic, assign, readonly) CGFloat cellHeight;
-
 @property (nonatomic, assign, getter = isDisplayingDetailedView) BOOL displayingDetailedView;
 
 @end
@@ -195,7 +193,7 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-	NSInteger number = [_dataSource numberOfPhotosForPhotoBrowser:self];
+	NSInteger number = [self.dataSource numberOfPhotosForPhotoBrowser:self];
     
     if (number > 0 && _currentlySelectedIndex == NSNotFound && !self.currentWindow.hidden) {
         // initialize with info for the first photo in photoTable
@@ -209,8 +207,8 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
 {
     UITableViewCell<AGPhotoBrowserCellProtocol> *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (!cell) {
-        if ([_dataSource respondsToSelector:@selector(cellForBrowser:withReuseIdentifier:)]) {
-            cell = [_dataSource cellForBrowser:self withReuseIdentifier:CellIdentifier];
+        if ([self.dataSource respondsToSelector:@selector(cellForBrowser:withReuseIdentifier:)]) {
+            cell = [self.dataSource cellForBrowser:self withReuseIdentifier:CellIdentifier];
         } else {
             // -- Provide fallback if the user does not want its own implementation of a cell
             cell = [[AGPhotoBrowserCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
@@ -227,7 +225,7 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
 
 - (void)configureCell:(UITableViewCell<AGPhotoBrowserCellProtocol> *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
 {
-	if ([_dataSource respondsToSelector:@selector(photoBrowser:shouldDisplayOverlayViewAtIndex:)]) {
+	if ([self.dataSource respondsToSelector:@selector(photoBrowser:shouldDisplayOverlayViewAtIndex:)]) {
 		BOOL overlayIsVisible = [_dataSource photoBrowser:self shouldDisplayOverlayViewAtIndex:indexPath.row];
 //		self.overlayView.hidden = !overlayIsVisible;
 	}
@@ -236,7 +234,7 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
         [cell resetZoomScale];
     }
     
-    if ([_dataSource respondsToSelector:@selector(photoBrowser:URLStringForImageAtIndex:)] && [cell respondsToSelector:@selector(setCellImageWithURL:)]) {
+    if ([self.dataSource respondsToSelector:@selector(photoBrowser:URLStringForImageAtIndex:)] && [cell respondsToSelector:@selector(setCellImageWithURL:)]) {
         [cell setCellImageWithURL:[NSURL URLWithString:[_dataSource photoBrowser:self URLStringForImageAtIndex:indexPath.row]]];
     } else if ([_dataSource respondsToSelector:@selector(photoBrowser:imageAtIndex:)]) {
         [cell setCellImage:[_dataSource photoBrowser:self imageAtIndex:indexPath.row]];
@@ -298,13 +296,13 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
 //        self.overlayView.actionButton.hidden = NO;
     }
     
-	if ([_dataSource respondsToSelector:@selector(photoBrowser:titleForImageAtIndex:)]) {
+	if ([self.dataSource respondsToSelector:@selector(photoBrowser:titleForImageAtIndex:)]) {
 //		self.overlayView.title = [_dataSource photoBrowser:self titleForImageAtIndex:_currentlySelectedIndex];
 	} else {
 //        self.overlayView.title = @"";
     }
 	
-	if ([_dataSource respondsToSelector:@selector(photoBrowser:descriptionForImageAtIndex:)]) {
+	if ([self.dataSource respondsToSelector:@selector(photoBrowser:descriptionForImageAtIndex:)]) {
 //		self.overlayView.description = [_dataSource photoBrowser:self descriptionForImageAtIndex:_currentlySelectedIndex];
 	} else {
 //        self.overlayView.description = @"";
@@ -317,10 +315,10 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
 - (void)show
 {
     NSLog(@"This method has been deprecated and will be removed in a future release. Use showAnimated: instead.");
-	[self showAnimated:YES];
+	[self showAnimated:YES withCompletion:nil];
 }
 
-- (void)showAnimated:(BOOL)animated
+- (void)showAnimated:(BOOL)animated withCompletion:(void (^)(BOOL))completionBlock
 {
 	self.previousWindow = [[UIApplication sharedApplication] keyWindow];
     
@@ -341,11 +339,13 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
 						 self.backgroundColor = [UIColor colorWithWhite:0. alpha:1.];
 					 }
 					 completion:^(BOOL finished){
-						 if (finished) {
-							 self.userInteractionEnabled = YES;
-							 self.displayingDetailedView = YES;
-							 self.photoTableView.alpha = 1.;
-							 [self.photoTableView reloadData];
+						 self.userInteractionEnabled = YES;
+						 self.displayingDetailedView = YES;
+						 self.photoTableView.alpha = 1.;
+						 [self.photoTableView reloadData];
+						 
+						 if (completionBlock) {
+							 completionBlock(finished);
 						 }
 					 }];
 }
@@ -353,16 +353,20 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
 - (void)showFromIndex:(NSInteger)initialIndex
 {
 	NSLog(@"This method has been deprecated and will be removed in a future release. Use showFromIndex:animated: instead.");
-	[self showFromIndex:initialIndex animated:YES];
+	[self showFromIndex:initialIndex animated:YES withCompletion:nil];
 }
 
-- (void)showFromIndex:(NSInteger)initialIndex animated:(BOOL)animated
+- (void)showFromIndex:(NSInteger)initialIndex animated:(BOOL)animated withCompletion:(void (^)(BOOL))completionBlock
 {
-	[self showAnimated:animated];
-	
-	if (initialIndex < [_dataSource numberOfPhotosForPhotoBrowser:self]) {
-		[self.photoTableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:initialIndex inSection:0] atScrollPosition:UITableViewScrollPositionMiddle animated:NO];
-	}
+	[self showAnimated:animated
+		withCompletion:^(BOOL finished) {
+			if (initialIndex < [self.dataSource numberOfPhotosForPhotoBrowser:self]) {
+				[self.photoTableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:initialIndex inSection:0] atScrollPosition:UITableViewScrollPositionMiddle animated:NO];
+			}
+			if (completionBlock) {
+				completionBlock(finished);
+			}
+		}];
 }
 
 - (void)hideWithCompletion:(void(^)(BOOL finished))completionBlock
@@ -399,8 +403,8 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
 
 - (void)sharingView:(AGPhotoBrowserOverlayView *)sharingView didTapOnActionButton:(UIButton *)actionButton
 {
-	if ([_delegate respondsToSelector:@selector(photoBrowser:didTapOnActionButton:atIndex:)]) {
-		[_delegate photoBrowser:self didTapOnActionButton:actionButton atIndex:_currentlySelectedIndex];
+	if ([self.delegate respondsToSelector:@selector(photoBrowser:didTapOnActionButton:atIndex:)]) {
+		[self.delegate photoBrowser:self didTapOnActionButton:actionButton atIndex:_currentlySelectedIndex];
 	}
 }
 
@@ -425,17 +429,7 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
 		self.photoTableView.scrollEnabled = YES;
 		// -- Check if user dismissed the view
 		CGPoint endingPanPoint = [recognizer translationInView:self];
-
-		UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
-		CGPoint translatedPoint;
-		
-        if (UIDeviceOrientationIsPortrait(orientation) || orientation == UIDeviceOrientationFaceUp) {
-            translatedPoint = CGPointMake(_startingPanPoint.x - endingPanPoint.y, _startingPanPoint.y);
-        } else if (orientation == UIDeviceOrientationLandscapeLeft) {
-            translatedPoint = CGPointMake(_startingPanPoint.x + endingPanPoint.x, _startingPanPoint.y);
-        } else {
-            translatedPoint = CGPointMake(_startingPanPoint.x - endingPanPoint.x, _startingPanPoint.y);
-        }
+		CGPoint translatedPoint = CGPointMake(_startingPanPoint.x + endingPanPoint.x, _startingPanPoint.y);
 		
 		imageView.center = translatedPoint;
 		int heightDifference = abs(floor(_startingPanPoint.x - translatedPoint.x));
@@ -462,17 +456,7 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
 		}
 	} else {
 		CGPoint middlePanPoint = [recognizer translationInView:self];
-		
-		UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
-		CGPoint translatedPoint;
-		
-        if (UIDeviceOrientationIsPortrait(orientation) || orientation == UIDeviceOrientationFaceUp) {
-            translatedPoint = CGPointMake(_startingPanPoint.x - middlePanPoint.y, _startingPanPoint.y);
-        } else if (orientation == UIDeviceOrientationLandscapeLeft) {
-            translatedPoint = CGPointMake(_startingPanPoint.x + middlePanPoint.x, _startingPanPoint.y);
-        } else {
-            translatedPoint = CGPointMake(_startingPanPoint.x - middlePanPoint.x, _startingPanPoint.y);
-        }
+		CGPoint translatedPoint = CGPointMake(_startingPanPoint.x + middlePanPoint.x, _startingPanPoint.y);
 		
 		imageView.center = translatedPoint;
 		int heightDifference = abs(floor(_startingPanPoint.x - translatedPoint.x));
@@ -486,9 +470,9 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
 
 - (void)p_doneButtonTapped:(UIButton *)sender
 {
-	if ([_delegate respondsToSelector:@selector(photoBrowser:didTapOnDoneButton:)]) {
+	if ([self.delegate respondsToSelector:@selector(photoBrowser:didTapOnDoneButton:)]) {
 		self.displayingDetailedView = NO;
-		[_delegate photoBrowser:self didTapOnDoneButton:sender];
+		[self.delegate photoBrowser:self didTapOnDoneButton:sender];
 	}
 }
 
@@ -499,45 +483,21 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
 {
     // -- Get the device orientation
     UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
-	if (UIDeviceOrientationIsPortrait(orientation) || UIDeviceOrientationIsLandscape(orientation) || orientation == UIDeviceOrientationFaceUp) {
 		_changingOrientation = YES;
 		
 		CGFloat angleTable = UIInterfaceOrientationAngleOfOrientation(orientation);
-		CGFloat angleOverlay = UIInterfaceOrientationAngleOfOrientationForOverlay(orientation);
-		CGAffineTransform tableTransform = CGAffineTransformMakeRotation(angleTable);
-		CGAffineTransform overlayTransform = CGAffineTransformMakeRotation(angleOverlay);
-		
-		CGRect tableFrame = [UIScreen mainScreen].bounds;
-		CGRect overlayFrame = CGRectZero;
-		CGRect doneFrame = CGRectZero;
+		CGAffineTransform viewTransform = CGAffineTransformMakeRotation(angleTable);
+		CGRect viewFrame = [UIScreen mainScreen].bounds;
 		
 		// -- Update table
-		[self setTransform:tableTransform andFrame:tableFrame forView:self];
+		[self setTransform:viewTransform andFrame:viewFrame forView:self];
 		[self setNeedsUpdateConstraints];
 		
-		if (UIDeviceOrientationIsPortrait(orientation) || orientation == UIDeviceOrientationFaceUp) {
-//			overlayFrame = CGRectMake(0, CGRectGetHeight(tableFrame) - AGPhotoBrowserOverlayInitialHeight, CGRectGetWidth(tableFrame), AGPhotoBrowserOverlayInitialHeight);
-//			doneFrame = CGRectMake(CGRectGetWidth(tableFrame) - 60 - 10, 15, 60, 32);
-		} else if (orientation == UIDeviceOrientationLandscapeLeft) {
-//			overlayFrame = CGRectMake(0, 0, AGPhotoBrowserOverlayInitialHeight, CGRectGetHeight(tableFrame));
-//			doneFrame = CGRectMake(CGRectGetWidth(tableFrame) - 32 - 15, CGRectGetHeight(tableFrame) - 10 - 60, 32, 60);
-		} else {
-//			overlayFrame = CGRectMake(CGRectGetWidth(tableFrame) - AGPhotoBrowserOverlayInitialHeight, 0, AGPhotoBrowserOverlayInitialHeight, CGRectGetHeight(tableFrame));
-//			doneFrame = CGRectMake(15, 10, 32, 60);
-		}
-		// -- Update overlay
-//		[self setTransform:overlayTransform andFrame:overlayFrame forView:self.overlayView];
-//		if (self.overlayView.descriptionExpanded) {
-//			[self.overlayView resetOverlayView];
-//		}
-		// -- Update done button
-//		[self setTransform:overlayTransform andFrame:doneFrame forView:self.doneButton];
-		
-//		[self.photoTableView reloadData];
-//		[self.photoTableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:_currentlySelectedIndex inSection:0] atScrollPosition:UITableViewScrollPositionNone animated:NO];
+		[self.photoTableView reloadData];
+
+		[self.photoTableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:_currentlySelectedIndex inSection:0] atScrollPosition:UITableViewScrollPositionNone animated:NO];
 
 		_changingOrientation = NO;
-	}
 }
 
 - (void)setTransform:(CGAffineTransform)transform andFrame:(CGRect)frame forView:(UIView *)view
@@ -555,9 +515,6 @@ CGFloat UIInterfaceOrientationAngleOfOrientation(UIDeviceOrientation orientation
     CGFloat angle;
     
     switch (orientation) {
-        case UIDeviceOrientationPortraitUpsideDown:
-            angle = -M_PI_2;
-            break;
         case UIDeviceOrientationLandscapeLeft:
             angle = 0;
             break;
@@ -566,28 +523,6 @@ CGFloat UIInterfaceOrientationAngleOfOrientation(UIDeviceOrientation orientation
             break;
         default:
             angle = -M_PI_2;
-            break;
-    }
-    
-    return angle;
-}
-
-CGFloat UIInterfaceOrientationAngleOfOrientationForOverlay(UIDeviceOrientation orientation)
-{
-    CGFloat angle;
-    
-    switch (orientation) {
-        case UIDeviceOrientationPortraitUpsideDown:
-            angle = 0;
-            break;
-        case UIDeviceOrientationLandscapeLeft:
-            angle = M_PI_2;
-            break;
-        case UIDeviceOrientationLandscapeRight:
-            angle = -M_PI_2;
-            break;
-        default:
-            angle = 0;
             break;
     }
     

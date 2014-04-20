@@ -109,7 +109,7 @@
     if (gestureRecognizer == self.panGesture) {
         UIView *imageView = [gestureRecognizer view];
         CGPoint translation = [gestureRecognizer translationInView:[imageView superview]];
-        
+
         // -- Check for movement axis
         if (fabsf(translation.x) > fabsf(translation.y)) {
             return YES;

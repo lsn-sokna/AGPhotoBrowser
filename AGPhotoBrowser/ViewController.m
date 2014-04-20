@@ -97,7 +97,7 @@
 #pragma mark - UITableView Delegate methods
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-	[self.browserView showFromIndex:indexPath.row animated:YES];
+	[self.browserView showFromIndex:indexPath.row animated:YES withCompletion:nil];
 }
 
 

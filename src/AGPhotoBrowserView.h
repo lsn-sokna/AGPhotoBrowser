@@ -31,8 +31,9 @@
  *  both on iOS6 and iOS7.
  *
  *  @param animated YES to animate the transition with a fade-in effect, NO to make the transition immediate.
+ *  @param completionBlock a completion block to be called when the animation is completed.
  */
-- (void)showAnimated:(BOOL)animated;
+- (void)showAnimated:(BOOL)animated withCompletion:(void(^)(BOOL finished))completionBlock;
 
 /**
  *  Replaced by showFromIndex:animated:
@@ -49,8 +50,9 @@
  *
  *  @param initialIndex the index must be in the range (0, numberOfPhotosForPhotoBrowser:)
  *  @param animated     YES to animate the transition with a fade-in effect, NO to make the transition immediate.
+ *  @param completionBlock a completion block to be called when the animation is completed.
  */
-- (void)showFromIndex:(NSInteger)initialIndex animated:(BOOL)animated;
+- (void)showFromIndex:(NSInteger)initialIndex animated:(BOOL)animated withCompletion:(void(^)(BOOL finished))completionBlock;
 
 /**
  *  Replaced by hideAnimated:withCompletion
