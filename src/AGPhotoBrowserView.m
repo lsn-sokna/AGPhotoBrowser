@@ -15,12 +15,12 @@
 #import "AGPhotoBrowserCellProtocol.h"
 
 @interface AGPhotoBrowserView () <
-AGPhotoBrowserOverlayViewDelegate,
-AGPhotoBrowserCellDelegate,
-UITableViewDataSource,
-UITableViewDelegate,
-UIGestureRecognizerDelegate
-> {
+	AGPhotoBrowserOverlayViewDelegate,
+	AGPhotoBrowserCellDelegate,
+	UITableViewDataSource,
+	UITableViewDelegate
+>
+{
 	CGPoint _startingPanPoint;
 	NSInteger _currentlySelectedIndex;
 }
@@ -39,11 +39,10 @@ UIGestureRecognizerDelegate
 @end
 
 
-static NSString *CellIdentifier = @"AGPhotoBrowserCell";
-
 @implementation AGPhotoBrowserView
 
-const NSInteger AGPhotoBrowserThresholdToCenter = 150;
+NSString * const cellIdentifier = @"AGPhotoBrowserCell";
+NSInteger const AGPhotoBrowserThresholdToCenter = 150;
 
 - (instancetype)initWithFrame:(CGRect)frame
 {
@@ -60,7 +59,6 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
 	self.userInteractionEnabled = NO;
 	self.backgroundColor = [UIColor colorWithWhite:0. alpha:0.];
 	_currentlySelectedIndex = NSNotFound;
-    _changingOrientation = NO;
 	
 	[self addSubview:self.photoTableView];
 	[self addSubview:self.doneButton];
@@ -205,13 +203,13 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    UITableViewCell<AGPhotoBrowserCellProtocol> *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    UITableViewCell<AGPhotoBrowserCellProtocol> *cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier];
     if (!cell) {
         if ([self.dataSource respondsToSelector:@selector(cellForBrowser:withReuseIdentifier:)]) {
-            cell = [self.dataSource cellForBrowser:self withReuseIdentifier:CellIdentifier];
+            cell = [self.dataSource cellForBrowser:self withReuseIdentifier:cellIdentifier];
         } else {
             // -- Provide fallback if the user does not want its own implementation of a cell
-            cell = [[AGPhotoBrowserCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+            cell = [[AGPhotoBrowserCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellIdentifier];
         }
         
 		cell.selectionStyle = UITableViewCellSelectionStyleNone;
@@ -274,7 +272,7 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
-    if (!self.currentWindow.hidden && !_changingOrientation) {
+    if (!self.currentWindow.hidden && !self.changingOrientation) {
 //        [self.overlayView resetOverlayView];
         
         CGPoint targetContentOffset = scrollView.contentOffset;
@@ -392,6 +390,7 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
                          [self.previousWindow makeKeyAndVisible];
                          self.currentWindow.hidden = YES;
                          self.currentWindow = nil;
+						 
 						 if(completionBlock) {
 							 completionBlock(finished);
 						 }
@@ -481,23 +480,24 @@ const NSInteger AGPhotoBrowserThresholdToCenter = 150;
 
 - (void)statusBarDidChangeFrame:(NSNotification *)notification
 {
+	self.changingOrientation = YES;
+	
     // -- Get the device orientation
     UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
-		_changingOrientation = YES;
-		
-		CGFloat angleTable = UIInterfaceOrientationAngleOfOrientation(orientation);
-		CGAffineTransform viewTransform = CGAffineTransformMakeRotation(angleTable);
-		CGRect viewFrame = [UIScreen mainScreen].bounds;
-		
-		// -- Update table
-		[self setTransform:viewTransform andFrame:viewFrame forView:self];
-		[self setNeedsUpdateConstraints];
-		
-		[self.photoTableView reloadData];
-
-		[self.photoTableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:_currentlySelectedIndex inSection:0] atScrollPosition:UITableViewScrollPositionNone animated:NO];
-
-		_changingOrientation = NO;
+	
+	CGFloat angleTable = UIInterfaceOrientationAngleOfOrientation(orientation);
+	CGAffineTransform viewTransform = CGAffineTransformMakeRotation(angleTable);
+	CGRect viewFrame = [UIScreen mainScreen].bounds;
+	
+	// -- Update table
+	[self setTransform:viewTransform andFrame:viewFrame forView:self];
+	[self setNeedsUpdateConstraints];
+	
+	[self.photoTableView reloadData];
+	[self.photoTableView layoutIfNeeded];
+	[self.photoTableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:_currentlySelectedIndex inSection:0] atScrollPosition:UITableViewScrollPositionNone animated:NO];
+	
+	self.changingOrientation = NO;
 }
 
 - (void)setTransform:(CGAffineTransform)transform andFrame:(CGRect)frame forView:(UIView *)view

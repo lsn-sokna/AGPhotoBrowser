@@ -21,7 +21,6 @@
 		DE2A3D9017A575C700CE0CA5 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DE2A3D8F17A575C700CE0CA5 /* Default-568h@2x.png */; };
 		DE2A3D9317A575C700CE0CA5 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DE2A3D9217A575C700CE0CA5 /* ViewController.m */; };
 		DE2A3D9617A575C700CE0CA5 /* ViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = DE2A3D9417A575C700CE0CA5 /* ViewController.xib */; };
-		DE2A3D9E17A575C700CE0CA5 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE2A3D9D17A575C700CE0CA5 /* SenTestingKit.framework */; };
 		DE2A3D9F17A575C700CE0CA5 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE2A3D7917A575C700CE0CA5 /* UIKit.framework */; };
 		DE2A3DA017A575C700CE0CA5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE2A3D7B17A575C700CE0CA5 /* Foundation.framework */; };
 		DE2A3DA817A575C700CE0CA5 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = DE2A3DA617A575C700CE0CA5 /* InfoPlist.strings */; };
@@ -69,8 +68,7 @@
 		DE2A3D9117A575C700CE0CA5 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		DE2A3D9217A575C700CE0CA5 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		DE2A3D9517A575C700CE0CA5 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ViewController.xib; sourceTree = "<group>"; };
-		DE2A3D9C17A575C700CE0CA5 /* AGPhotoBrowserTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AGPhotoBrowserTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
-		DE2A3D9D17A575C700CE0CA5 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
+		DE2A3D9C17A575C700CE0CA5 /* AGPhotoBrowserTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AGPhotoBrowserTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DE2A3DA517A575C700CE0CA5 /* AGPhotoBrowserTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "AGPhotoBrowserTests-Info.plist"; sourceTree = "<group>"; };
 		DE2A3DA717A575C700CE0CA5 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		DE2A3DA917A575C700CE0CA5 /* AGPhotoBrowserTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AGPhotoBrowserTests.h; sourceTree = "<group>"; };
@@ -107,7 +105,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DE2A3D9E17A575C700CE0CA5 /* SenTestingKit.framework in Frameworks */,
 				DE2A3D9F17A575C700CE0CA5 /* UIKit.framework in Frameworks */,
 				DE2A3DA017A575C700CE0CA5 /* Foundation.framework in Frameworks */,
 			);
@@ -130,7 +127,7 @@
 			isa = PBXGroup;
 			children = (
 				DE2A3D7617A575C700CE0CA5 /* AGPhotoBrowser.app */,
-				DE2A3D9C17A575C700CE0CA5 /* AGPhotoBrowserTests.octest */,
+				DE2A3D9C17A575C700CE0CA5 /* AGPhotoBrowserTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -142,7 +139,6 @@
 				DE2A3D7917A575C700CE0CA5 /* UIKit.framework */,
 				DE2A3D7B17A575C700CE0CA5 /* Foundation.framework */,
 				DE2A3D7D17A575C700CE0CA5 /* CoreGraphics.framework */,
-				DE2A3D9D17A575C700CE0CA5 /* SenTestingKit.framework */,
 				HYXIFWTDXJPPRRMDCEPMDTJH /* libz.dylib */,
 			);
 			name = Frameworks;
@@ -271,8 +267,8 @@
 			);
 			name = AGPhotoBrowserTests;
 			productName = AGPhotoBrowserTests;
-			productReference = DE2A3D9C17A575C700CE0CA5 /* AGPhotoBrowserTests.octest */;
-			productType = "com.apple.product-type.bundle";
+			productReference = DE2A3D9C17A575C700CE0CA5 /* AGPhotoBrowserTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -280,6 +276,7 @@
 		DE2A3D6E17A575C700CE0CA5 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastTestingUpgradeCheck = 0510;
 				LastUpgradeCheck = 0460;
 				ORGANIZATIONNAME = "Andrea Giavatto";
 			};
@@ -432,7 +429,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -461,7 +458,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
@@ -501,13 +498,13 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"\"$(SDKROOT)/Developer/Library/Frameworks\"",
 					"\"$(DEVELOPER_LIBRARY_DIR)/Frameworks\"",
+					"$(inherited)",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AGPhotoBrowser/AGPhotoBrowser-Prefix.pch";
 				INFOPLIST_FILE = "AGPhotoBrowserTests/AGPhotoBrowserTests-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUNDLE_LOADER)";
-				WRAPPER_EXTENSION = octest;
 			};
 			name = Debug;
 		};
@@ -518,13 +515,13 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"\"$(SDKROOT)/Developer/Library/Frameworks\"",
 					"\"$(DEVELOPER_LIBRARY_DIR)/Frameworks\"",
+					"$(inherited)",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AGPhotoBrowser/AGPhotoBrowser-Prefix.pch";
 				INFOPLIST_FILE = "AGPhotoBrowserTests/AGPhotoBrowserTests-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUNDLE_LOADER)";
-				WRAPPER_EXTENSION = octest;
 			};
 			name = Release;
 		};
