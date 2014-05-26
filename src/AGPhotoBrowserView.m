@@ -13,6 +13,8 @@
 #import "AGPhotoBrowserZoomableView.h"
 #import "AGPhotoBrowserCell.h"
 #import "AGPhotoBrowserCellProtocol.h"
+#import "UIView+Rotate.h"
+
 
 @interface AGPhotoBrowserView () <
 	AGPhotoBrowserOverlayViewDelegate,
@@ -25,9 +27,9 @@
 	NSInteger _currentlySelectedIndex;
 }
 
-@property (nonatomic, strong, readwrite) UIButton *doneButton;
+//@property (nonatomic, strong, readwrite) UIButton *doneButton;
 @property (nonatomic, strong) UITableView *photoTableView;
-//@property (nonatomic, strong) AGPhotoBrowserOverlayView *overlayView;
+@property (nonatomic, strong) AGPhotoBrowserOverlayView *overlayView;
 
 @property (nonatomic, strong) UIWindow *previousWindow;
 @property (nonatomic, strong) UIWindow *currentWindow;
@@ -61,8 +63,8 @@ NSInteger const AGPhotoBrowserThresholdToCenter = 150;
 	_currentlySelectedIndex = NSNotFound;
 	
 	[self addSubview:self.photoTableView];
-	[self addSubview:self.doneButton];
-//	[self addSubview:self.overlayView];
+//	[self addSubview:self.doneButton];
+	[self addSubview:self.overlayView];
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(statusBarDidChangeFrame:)
@@ -74,13 +76,14 @@ NSInteger const AGPhotoBrowserThresholdToCenter = 150;
 {
 	[self removeConstraints:self.constraints];
 	
-	NSDictionary *constrainedViews = NSDictionaryOfVariableBindings(_photoTableView/*, _overlayView*/);
+	NSDictionary *constrainedViews = NSDictionaryOfVariableBindings(_photoTableView, _overlayView);
+	NSDictionary *metrics = @{};
 	// -- Horizontal constraints
-	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_photoTableView]|" options:0 metrics:@{} views:constrainedViews]];
-//	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_overlayView]|" options:0	 metrics:@{} views:constrainedViews]];
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_photoTableView]|" options:0 metrics:metrics views:constrainedViews]];
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_overlayView]|" options:0	 metrics:metrics views:constrainedViews]];
 	// -- Vertical constraints
-	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_photoTableView]|" options:0 metrics:@{} views:constrainedViews]];
-//	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_overlayView]|" options:0	 metrics:@{} views:constrainedViews]];
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_photoTableView]|" options:0 metrics:metrics views:constrainedViews]];
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_overlayView]|" options:0	 metrics:metrics views:constrainedViews]];
 	
 	[super updateConstraints];
 }
@@ -93,26 +96,26 @@ NSInteger const AGPhotoBrowserThresholdToCenter = 150;
 
 #pragma mark - Getters
 
-- (UIButton *)doneButton
-{
-	if (!_doneButton) {
-		_doneButton = [[UIButton alloc] initWithFrame:CGRectZero];
-		_doneButton.translatesAutoresizingMaskIntoConstraints = NO;
-		[_doneButton setTitle:NSLocalizedString(@"Done", @"Title for Done button") forState:UIControlStateNormal];
-		_doneButton.layer.cornerRadius = 3.0f;
-		_doneButton.layer.borderColor = [UIColor colorWithWhite:0.9 alpha:0.9].CGColor;
-		_doneButton.layer.borderWidth = 1.0f;
-		[_doneButton setBackgroundColor:[UIColor colorWithWhite:0.1 alpha:0.5]];
-		[_doneButton setTitleColor:[UIColor colorWithWhite:0.9 alpha:0.9] forState:UIControlStateNormal];
-		[_doneButton setTitleColor:[UIColor colorWithWhite:0.9 alpha:0.9] forState:UIControlStateHighlighted];
-		[_doneButton.titleLabel setFont:[UIFont boldSystemFontOfSize:14.0f]];
-		_doneButton.alpha = 0.;
-		
-		[_doneButton addTarget:self action:@selector(p_doneButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
-	}
-	
-	return _doneButton;
-}
+//- (UIButton *)doneButton
+//{
+//	if (!_doneButton) {
+//		_doneButton = [[UIButton alloc] initWithFrame:CGRectZero];
+//		_doneButton.translatesAutoresizingMaskIntoConstraints = NO;
+//		[_doneButton setTitle:NSLocalizedString(@"Done", @"Title for Done button") forState:UIControlStateNormal];
+//		_doneButton.layer.cornerRadius = 3.0f;
+//		_doneButton.layer.borderColor = [UIColor colorWithWhite:0.9 alpha:0.9].CGColor;
+//		_doneButton.layer.borderWidth = 1.0f;
+//		[_doneButton setBackgroundColor:[UIColor colorWithWhite:0.1 alpha:0.5]];
+//		[_doneButton setTitleColor:[UIColor colorWithWhite:0.9 alpha:0.9] forState:UIControlStateNormal];
+//		[_doneButton setTitleColor:[UIColor colorWithWhite:0.9 alpha:0.9] forState:UIControlStateHighlighted];
+//		[_doneButton.titleLabel setFont:[UIFont boldSystemFontOfSize:14.0f]];
+//		_doneButton.alpha = 0.;
+//		
+//		[_doneButton addTarget:self action:@selector(p_doneButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
+//	}
+//	
+//	return _doneButton;
+//}
 
 - (UITableView *)photoTableView
 {
@@ -132,16 +135,17 @@ NSInteger const AGPhotoBrowserThresholdToCenter = 150;
 	return _photoTableView;
 }
 
-//- (AGPhotoBrowserOverlayView *)overlayView
-//{
-//	if (!_overlayView) {
-//		_overlayView = [[AGPhotoBrowserOverlayView alloc] initWithFrame:CGRectZero];
-//		_overlayView.translatesAutoresizingMaskIntoConstraints = NO;
-//        _overlayView.delegate = self;
-//	}
-//	
-//	return _overlayView;
-//}
+- (AGPhotoBrowserOverlayView *)overlayView
+{
+	if (!_overlayView) {
+		_overlayView = [[AGPhotoBrowserOverlayView alloc] initWithFrame:CGRectZero];
+		_overlayView.translatesAutoresizingMaskIntoConstraints = NO;
+        _overlayView.delegate = self;
+		[_overlayView AG_rotateRadians:M_PI_2];
+	}
+	
+	return _overlayView;
+}
 
 - (CGFloat)cellHeight
 {
@@ -160,20 +164,12 @@ NSInteger const AGPhotoBrowserThresholdToCenter = 150;
 {
 	_displayingDetailedView = displayingDetailedView;
 	
-	CGFloat newAlpha;
+	[self.overlayView setOverlayVisible:_displayingDetailedView animated:YES];
 	
-	if (_displayingDetailedView) {
-//		[self.overlayView setOverlayVisible:YES animated:YES];
-		newAlpha = 1.;
-	} else {
-//		[self.overlayView setOverlayVisible:NO animated:YES];
-		newAlpha = 0.;
-	}
-	
-	[UIView animateWithDuration:AGPhotoBrowserAnimationDuration
-					 animations:^(){
-						 self.doneButton.alpha = newAlpha;
-					 }];
+//	[UIView animateWithDuration:AGPhotoBrowserAnimationDuration
+//					 animations:^(){
+//						 self.doneButton.alpha = newAlpha;
+//					 }];
 }
 
 
@@ -313,7 +309,7 @@ NSInteger const AGPhotoBrowserThresholdToCenter = 150;
 - (void)show
 {
     NSLog(@"This method has been deprecated and will be removed in a future release. Use showAnimated: instead.");
-	[self showAnimated:YES withCompletion:nil];
+	return;
 }
 
 - (void)showAnimated:(BOOL)animated withCompletion:(void (^)(BOOL))completionBlock
@@ -351,7 +347,7 @@ NSInteger const AGPhotoBrowserThresholdToCenter = 150;
 - (void)showFromIndex:(NSInteger)initialIndex
 {
 	NSLog(@"This method has been deprecated and will be removed in a future release. Use showFromIndex:animated: instead.");
-	[self showFromIndex:initialIndex animated:YES withCompletion:nil];
+	return;
 }
 
 - (void)showFromIndex:(NSInteger)initialIndex animated:(BOOL)animated withCompletion:(void (^)(BOOL))completionBlock
@@ -370,7 +366,7 @@ NSInteger const AGPhotoBrowserThresholdToCenter = 150;
 - (void)hideWithCompletion:(void(^)(BOOL finished))completionBlock
 {
 	NSLog(@"This method has been deprecated and will be removed in a future release. Use hideAnimated:withCompletion: instead.");
-	[self hideAnimated:YES withCompletion:completionBlock];
+	return;
 }
 
 - (void)hideAnimated:(BOOL)animated withCompletion:(void (^)(BOOL))completionBlock
@@ -467,13 +463,13 @@ NSInteger const AGPhotoBrowserThresholdToCenter = 150;
 
 #pragma mark - Private methods
 
-- (void)p_doneButtonTapped:(UIButton *)sender
-{
-	if ([self.delegate respondsToSelector:@selector(photoBrowser:didTapOnDoneButton:)]) {
-		self.displayingDetailedView = NO;
-		[self.delegate photoBrowser:self didTapOnDoneButton:sender];
-	}
-}
+//- (void)p_doneButtonTapped:(UIButton *)sender
+//{
+//	if ([self.delegate respondsToSelector:@selector(photoBrowser:didTapOnDoneButton:)]) {
+//		self.displayingDetailedView = NO;
+//		[self.delegate photoBrowser:self didTapOnDoneButton:sender];
+//	}
+//}
 
 
 #pragma mark - Orientation change

@@ -14,6 +14,7 @@
 
 @property (nonatomic, strong) AGPhotoBrowserZoomableView *zoomableView;
 @property (nonatomic, strong) UIPanGestureRecognizer *panGesture;
+@property (nonatomic, assign, getter = isZoomedIn) BOOL zoomedIn;
 
 @end
 
@@ -23,16 +24,21 @@
 {
 	self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
 	if (self) {
-		[self setupCell];
+		[self p_setupCell];
 	}
 	
 	return self;
 }
 
-- (void)setupCell
+- (void)p_setupCell
 {
     self.contentView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 	[self.contentView addSubview:self.zoomableView];
+}
+
++ (BOOL)requiresConstraintBasedLayout
+{
+	return YES;
 }
 
 - (void)updateConstraints
@@ -53,23 +59,23 @@
 	[super updateConstraints];
 }
 
-- (void)setFrame:(CGRect)frame
-{
-    // -- Force the right frame
-    CGRect correctFrame = frame;
-    UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
-    if (UIDeviceOrientationIsPortrait(orientation) || UIDeviceOrientationIsLandscape(orientation) || orientation == UIDeviceOrientationFaceUp) {
-        if (UIDeviceOrientationIsPortrait(orientation) || orientation == UIDeviceOrientationFaceUp) {
-            correctFrame.size.width = CGRectGetHeight([[UIScreen mainScreen] bounds]);
-            correctFrame.size.height = CGRectGetWidth([[UIScreen mainScreen] bounds]);
-        } else {
-            correctFrame.size.width = CGRectGetWidth([[UIScreen mainScreen] bounds]);
-            correctFrame.size.height = CGRectGetHeight([[UIScreen mainScreen] bounds]);
-        }
-    }
-    
-    [super setFrame:correctFrame];
-}
+//- (void)setFrame:(CGRect)frame
+//{
+//    // -- Force the right frame
+//    CGRect correctFrame = frame;
+//    UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+//    if (UIDeviceOrientationIsPortrait(orientation) || UIDeviceOrientationIsLandscape(orientation) || orientation == UIDeviceOrientationFaceUp) {
+//        if (UIDeviceOrientationIsPortrait(orientation) || orientation == UIDeviceOrientationFaceUp) {
+//            correctFrame.size.width = CGRectGetHeight([[UIScreen mainScreen] bounds]);
+//            correctFrame.size.height = CGRectGetWidth([[UIScreen mainScreen] bounds]);
+//        } else {
+//            correctFrame.size.width = CGRectGetWidth([[UIScreen mainScreen] bounds]);
+//            correctFrame.size.height = CGRectGetHeight([[UIScreen mainScreen] bounds]);
+//        }
+//    }
+//    
+//    [super setFrame:correctFrame];
+//}
 
 
 #pragma mark - Getters
@@ -111,7 +117,7 @@
         CGPoint translation = [gestureRecognizer translationInView:[imageView superview]];
 
         // -- Check for movement axis
-        if (fabsf(translation.x) > fabsf(translation.y)) {
+        if (fabsf(translation.x) > fabsf(translation.y) && !self.zoomedIn) {
             return YES;
         }
     }
@@ -151,6 +157,16 @@
 - (void)didDoubleTapZoomableView:(AGPhotoBrowserZoomableView *)zoomableView
 {
 	[self.delegate didDoubleTapOnZoomableViewForCell:self];
+}
+
+- (void)didZoomInZoomableView:(AGPhotoBrowserZoomableView *)zoomableView
+{
+	self.zoomedIn = YES;
+}
+
+- (void)didZoomOutZoomableView:(AGPhotoBrowserZoomableView *)zoomableView
+{
+	self.zoomedIn = NO;
 }
 
 @end

@@ -7,8 +7,9 @@
 //
 
 #import "AGPhotoBrowserOverlayView.h"
-
+#import "AGPhotoBrowserGradientView.h"
 #import <QuartzCore/QuartzCore.h>
+
 
 @interface AGPhotoBrowserOverlayView () {
 	BOOL _animated;
@@ -16,7 +17,7 @@
     CAGradientLayer *_gradientLayer;
 }
 
-@property (nonatomic, strong) UIView *sharingView;
+@property (nonatomic, strong) AGPhotoBrowserGradientView *sharingView;
 @property (nonatomic, assign, readwrite) BOOL descriptionExpanded;
 @property (nonatomic, strong) UITapGestureRecognizer *tapGesture;
 
@@ -37,12 +38,12 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
-		[self setupView];
+		[self p_setupView];
     }
     return self;
 }
 
-- (void)setupView
+- (void)p_setupView
 {
 	self.alpha = 0;
     
@@ -53,6 +54,7 @@
 	[self.sharingView addSubview:self.actionButton];
 	
 	[self addSubview:self.sharingView];
+	[self addGestureRecognizer:self.tapGesture];
 }
 
 - (void)updateConstraints
@@ -60,9 +62,7 @@
 	[self removeConstraints:self.constraints];
 	
 	NSDictionary *constrainedViews = NSDictionaryOfVariableBindings(_sharingView, _titleLabel, _separatorView, _descriptionLabel);
-	NSDictionary *metrics = @{
-							  @"SharingViewHeight" : @(100)
-							  };
+	NSDictionary *metrics = @{@"SharingViewHeight" : @(100)}; // -- Magic number
 	
 	// -- Horizontal constraints
 	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_sharingView]|" options:0 metrics:metrics views:constrainedViews]];
@@ -149,8 +149,8 @@
 
 - (void)setOverlayVisible:(BOOL)visible animated:(BOOL)animated
 {
+	_animated = animated;
     self.visible = visible;
-    _animated = animated;
 }
 
 - (void)resetOverlayView
@@ -205,15 +205,15 @@
 
 - (void)p_actionButtonTapped:(UIButton *)sender
 {
-	if ([_delegate respondsToSelector:@selector(sharingView:didTapOnActionButton:)]) {
-		[_delegate sharingView:self didTapOnActionButton:sender];
+	if ([self.delegate respondsToSelector:@selector(sharingView:didTapOnActionButton:)]) {
+		[self.delegate sharingView:self didTapOnActionButton:sender];
 	}
 }
 
 - (void)p_seeMoreButtonTapped:(UIButton *)sender
 {
-	if ([_delegate respondsToSelector:@selector(sharingView:didTapOnSeeMoreButton:)]) {
-		[_delegate sharingView:self didTapOnSeeMoreButton:sender];
+	if ([self.delegate respondsToSelector:@selector(sharingView:didTapOnSeeMoreButton:)]) {
+		[self.delegate sharingView:self didTapOnSeeMoreButton:sender];
 	}
     
     self.descriptionExpanded = YES;
@@ -240,7 +240,7 @@
                          self.frame = currentOverlayFrame;
                      }];
     
-    [self.sharingView addGestureRecognizer:self.tapGesture];
+//    [self.sharingView addGestureRecognizer:self.tapGesture];
 }
 
 
@@ -248,11 +248,9 @@
 
 - (void)p_tapGestureTapped:(UITapGestureRecognizer *)recognizer
 {
-	[self resetOverlayView];
+	self.visible = !self.visible;
+//	[self resetOverlayView];
 }
-
-
-#pragma mark - Overrides
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
 {
@@ -265,25 +263,14 @@
 
 #pragma mark - Setters
 
-- (void)setFrame:(CGRect)frame
-{
-	[super setFrame:frame];
-    
-    [self setNeedsLayout];
-}
-
 - (void)setVisible:(BOOL)visible
 {
 	_visible = visible;
 	
 	CGFloat newAlpha = _visible ? 1. : 0.;
-	
-	NSTimeInterval animationDuration = _animated ? AGPhotoBrowserAnimationDuration : 0;
-	
-	[UIView animateWithDuration:animationDuration
+	[UIView animateWithDuration:AGPhotoBrowserAnimationDuration
 					 animations:^(){
 						 self.alpha = newAlpha;
-						 self.actionButton.alpha = newAlpha;
 					 }];
 }
 
@@ -291,42 +278,27 @@
 {
 	_title = title;
 	
-    if (_title) {
-        self.titleLabel.text = _title;
-    } else {
-		self.descriptionLabel.text = @"";
-	}
-    
-    [self setNeedsLayout];
+	self.titleLabel.text = _title.length ? _title : @"";
 }
 
 - (void)setDescription:(NSString *)description
 {
 	_description = description;
 	
-	if ([_description length]) {
-		self.descriptionLabel.text = _description;
-	} else {
-		self.descriptionLabel.text = @"";
-	}
-    
-    [self setNeedsLayout];
+	self.descriptionLabel.text = _description.length ? _description : @"";
 }
 
 
 #pragma mark - Getters
 
-- (UIView *)sharingView
+- (AGPhotoBrowserGradientView *)sharingView
 {
 	if (!_sharingView) {
-		_sharingView = [[UIView alloc] initWithFrame:CGRectZero];
+		_sharingView = [[AGPhotoBrowserGradientView alloc] initWithFrame:CGRectZero];
 		_sharingView.translatesAutoresizingMaskIntoConstraints = NO;
-		_sharingView.alpha = 1.;
-		_sharingView.backgroundColor = [UIColor redColor];
-//        _gradientLayer = [CAGradientLayer layer];
-//		_gradientLayer.frame = self.bounds;
-//		_gradientLayer.colors = [NSArray arrayWithObjects:(id)[[UIColor clearColor] CGColor], (id)[[UIColor blackColor] CGColor], nil];
-//		[_sharingView.layer insertSublayer:_gradientLayer atIndex:0];
+		_sharingView.backgroundColor = [UIColor clearColor];
+
+		_sharingView.layer.colors = [NSArray arrayWithObjects:(id)[[UIColor clearColor] CGColor], (id)[[UIColor blackColor] CGColor], nil];
 	}
 	
 	return _sharingView;

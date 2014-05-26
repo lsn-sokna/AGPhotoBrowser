@@ -81,14 +81,26 @@
 - (void)p_imageTapped:(UITapGestureRecognizer *)recognizer
 {
     if (self.zoomScale > 1.0f) {
-        [UIView animateWithDuration:0.25 animations:^{
-            self.zoomScale = 1.0f;
-        }];
+        [UIView animateWithDuration:0.25
+						 animations:^{
+							 self.zoomScale = 1.0f;
+						 }
+						 completion:^(BOOL finished) {
+							 if ([self.zoomableDelegate respondsToSelector:@selector(didZoomOutZoomableView:)]) {
+								 [self.zoomableDelegate didZoomOutZoomableView:self];
+							 }
+						 }];
     } else {
-        [UIView animateWithDuration:0.25 animations:^{
-            CGPoint point = [recognizer locationInView:self];
-            [self zoomToRect:CGRectMake(point.x, point.y, 0, 0) animated:YES];
-        }];
+        [UIView animateWithDuration:0.25
+						 animations:^{
+							 CGPoint point = [recognizer locationInView:self];
+							 [self zoomToRect:CGRectMake(point.x, point.y, 0, 0) animated:YES];
+						 }
+						 completion:^(BOOL finished) {
+							 if ([self.zoomableDelegate respondsToSelector:@selector(didZoomInZoomableView:)]) {
+								 [self.zoomableDelegate didZoomInZoomableView:self];
+							 }
+						 }];
     }
 }
 

@@ -16,7 +16,7 @@
 @property (nonatomic, weak) id<AGPhotoBrowserDelegate> delegate;
 @property (nonatomic, weak) id<AGPhotoBrowserDataSource> dataSource;
 
-@property (nonatomic, strong, readonly) UIButton *doneButton;
+@property (nonatomic, strong, readonly) UIButton *doneButton __deprecated;
 
 /**
  *  Replaced by showAnimated:

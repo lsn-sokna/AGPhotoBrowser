@@ -31,6 +31,7 @@
 		DE48791C17CA84740048D0FC /* AGPhotoBrowserOverlayView.m in Sources */ = {isa = PBXBuildFile; fileRef = DE48791917CA84740048D0FC /* AGPhotoBrowserOverlayView.m */; };
 		DE48791D17CA84740048D0FC /* AGPhotoBrowserView.m in Sources */ = {isa = PBXBuildFile; fileRef = DE48791B17CA84740048D0FC /* AGPhotoBrowserView.m */; };
 		DE9D38E417A5ABA10058BC67 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE9D38E317A5ABA10058BC67 /* QuartzCore.framework */; };
+		DEEC1FB01917EA34000059C5 /* AGPhotoBrowserGradientView.m in Sources */ = {isa = PBXBuildFile; fileRef = DEEC1FAF1917EA34000059C5 /* AGPhotoBrowserGradientView.m */; };
 		DEFE659919014A70005B6DFE /* UIView+Rotate.m in Sources */ = {isa = PBXBuildFile; fileRef = DEFE659819014A70005B6DFE /* UIView+Rotate.m */; };
 		KIYDQKWBMRKIEYEVRWSLKUDQ /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = HYXIFWTDXJPPRRMDCEPMDTJH /* libz.dylib */; };
 /* End PBXBuildFile section */
@@ -83,6 +84,8 @@
 		DE48791A17CA84740048D0FC /* AGPhotoBrowserView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AGPhotoBrowserView.h; sourceTree = "<group>"; };
 		DE48791B17CA84740048D0FC /* AGPhotoBrowserView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AGPhotoBrowserView.m; sourceTree = "<group>"; };
 		DE9D38E317A5ABA10058BC67 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		DEEC1FAE1917EA34000059C5 /* AGPhotoBrowserGradientView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AGPhotoBrowserGradientView.h; sourceTree = "<group>"; };
+		DEEC1FAF1917EA34000059C5 /* AGPhotoBrowserGradientView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AGPhotoBrowserGradientView.m; sourceTree = "<group>"; };
 		DEFE659719014A70005B6DFE /* UIView+Rotate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+Rotate.h"; sourceTree = "<group>"; };
 		DEFE659819014A70005B6DFE /* UIView+Rotate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+Rotate.m"; sourceTree = "<group>"; };
 		HYXIFWTDXJPPRRMDCEPMDTJH /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
@@ -223,6 +226,8 @@
 				DE48791917CA84740048D0FC /* AGPhotoBrowserOverlayView.m */,
 				DE48791A17CA84740048D0FC /* AGPhotoBrowserView.h */,
 				DE48791B17CA84740048D0FC /* AGPhotoBrowserView.m */,
+				DEEC1FAE1917EA34000059C5 /* AGPhotoBrowserGradientView.h */,
+				DEEC1FAF1917EA34000059C5 /* AGPhotoBrowserGradientView.m */,
 				8D3D8ABA184202DE00154B6B /* AGPhotoBrowserZoomableView.h */,
 				8D3D8ABB184202DE00154B6B /* AGPhotoBrowserZoomableView.m */,
 				DEFE659719014A70005B6DFE /* UIView+Rotate.h */,
@@ -350,6 +355,7 @@
 				DE2A3D8A17A575C700CE0CA5 /* AppDelegate.m in Sources */,
 				DE2A3D9317A575C700CE0CA5 /* ViewController.m in Sources */,
 				8D3D8ABC184202DE00154B6B /* AGPhotoBrowserZoomableView.m in Sources */,
+				DEEC1FB01917EA34000059C5 /* AGPhotoBrowserGradientView.m in Sources */,
 				DE48791C17CA84740048D0FC /* AGPhotoBrowserOverlayView.m in Sources */,
 				DEFE659919014A70005B6DFE /* UIView+Rotate.m in Sources */,
 				DE13F9EC1879A23A00449C49 /* AGPhotoBrowserCell.m in Sources */,
