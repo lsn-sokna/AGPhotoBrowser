@@ -233,8 +233,6 @@ NSInteger const AGPhotoBrowserThresholdToCenter = 150;
     } else if ([_dataSource respondsToSelector:@selector(photoBrowser:imageAtIndex:)]) {
         [cell setCellImage:[_dataSource photoBrowser:self imageAtIndex:indexPath.row]];
     }
-	
-//	[self.overlayView resetOverlayView];
 }
 
 
@@ -268,9 +266,7 @@ NSInteger const AGPhotoBrowserThresholdToCenter = 150;
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
-    if (!self.currentWindow.hidden && !self.changingOrientation) {
-//        [self.overlayView resetOverlayView];
-        
+    if (!self.currentWindow.hidden && !self.changingOrientation) {        
         CGPoint targetContentOffset = scrollView.contentOffset;
         
         UITableView *tv = (UITableView*)scrollView;
@@ -291,15 +287,15 @@ NSInteger const AGPhotoBrowserThresholdToCenter = 150;
     }
     
 	if ([self.dataSource respondsToSelector:@selector(photoBrowser:titleForImageAtIndex:)]) {
-//		self.overlayView.title = [_dataSource photoBrowser:self titleForImageAtIndex:_currentlySelectedIndex];
+		self.overlayView.title = [self.dataSource photoBrowser:self titleForImageAtIndex:_currentlySelectedIndex];
 	} else {
-//        self.overlayView.title = @"";
+        self.overlayView.title = @"";
     }
 	
 	if ([self.dataSource respondsToSelector:@selector(photoBrowser:descriptionForImageAtIndex:)]) {
-//		self.overlayView.description = [_dataSource photoBrowser:self descriptionForImageAtIndex:_currentlySelectedIndex];
+		self.overlayView.description = [self.dataSource photoBrowser:self descriptionForImageAtIndex:_currentlySelectedIndex];
 	} else {
-//        self.overlayView.description = @"";
+        self.overlayView.description = @"";
     }
 }
 

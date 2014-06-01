@@ -13,13 +13,12 @@
 
 @interface AGPhotoBrowserOverlayView () {
 	BOOL _animated;
-    
-    CAGradientLayer *_gradientLayer;
+    NSInteger _descriptionLabelHeight;	
 }
 
 @property (nonatomic, strong) AGPhotoBrowserGradientView *sharingView;
-@property (nonatomic, assign, readwrite) BOOL descriptionExpanded;
 @property (nonatomic, strong) UITapGestureRecognizer *tapGesture;
+@property (nonatomic, strong) UITapGestureRecognizer *resetGesture;
 
 @property (nonatomic, strong, readwrite) UILabel *titleLabel;
 @property (nonatomic, strong, readwrite) UILabel *descriptionLabel;
@@ -34,6 +33,9 @@
 
 @implementation AGPhotoBrowserOverlayView
 
+const NSInteger AGOverlayMargin = 20;
+const NSInteger AGInitialDescriptionHeight = 32;
+
 - (instancetype)initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
@@ -46,12 +48,14 @@
 - (void)p_setupView
 {
 	self.alpha = 0;
+	_descriptionLabelHeight = AGInitialDescriptionHeight;
     
 	[self.sharingView addSubview:self.titleLabel];
 	[self.sharingView addSubview:self.separatorView];
 	[self.sharingView addSubview:self.descriptionLabel];
 	[self.sharingView addSubview:self.seeMoreButton];
 	[self.sharingView addSubview:self.actionButton];
+	[self.sharingView addGestureRecognizer:self.resetGesture];
 	
 	[self addSubview:self.sharingView];
 	[self addGestureRecognizer:self.tapGesture];
@@ -61,88 +65,23 @@
 {
 	[self removeConstraints:self.constraints];
 	
-	NSDictionary *constrainedViews = NSDictionaryOfVariableBindings(_sharingView, _titleLabel, _separatorView, _descriptionLabel);
-	NSDictionary *metrics = @{@"SharingViewHeight" : @(100)}; // -- Magic number
+	NSDictionary *constrainedViews = NSDictionaryOfVariableBindings(_sharingView, _titleLabel, _separatorView, _descriptionLabel, _seeMoreButton, _actionButton);
+	NSDictionary *metrics = @{@"SharingViewHeight" : @(_descriptionLabelHeight + 130), @"DescriptionLabelHeight" : @(_descriptionLabelHeight), @"AGOverlayMargin" : @(AGOverlayMargin)};
 	
 	// -- Horizontal constraints
 	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_sharingView]|" options:0 metrics:metrics views:constrainedViews]];
-	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(==20)-[_titleLabel]-(==20)-|" options:0 metrics:metrics views:constrainedViews]];
-	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(==20)-[_separatorView]-(==20)-|" options:0 metrics:metrics views:constrainedViews]];
-	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(==20)-[_descriptionLabel]-(==20)-|" options:0 metrics:metrics views:constrainedViews]];
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(==AGOverlayMargin)-[_titleLabel]-(==AGOverlayMargin)-|" options:0 metrics:metrics views:constrainedViews]];
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(==AGOverlayMargin)-[_separatorView]-(==AGOverlayMargin)-|" options:0 metrics:metrics views:constrainedViews]];
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(==AGOverlayMargin)-[_descriptionLabel]-(==AGOverlayMargin)-|" options:0 metrics:metrics views:constrainedViews]];
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(>=0)-[_seeMoreButton(==60)]-(==AGOverlayMargin)-|" options:0 metrics:metrics views:constrainedViews]];
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(>=0)-[_actionButton(==60)]-(==10)-|" options:0 metrics:metrics views:constrainedViews]];
+	
 	// -- Vertical constraints
 	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(>=0)-[_sharingView(==SharingViewHeight)]|" options:0 metrics:metrics views:constrainedViews]];
-	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(==30)-[_titleLabel(==20)][_separatorView(==1)]-[_descriptionLabel(>=20)]-(>=0)-|" options:0 metrics:metrics views:constrainedViews]];
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(==30)-[_titleLabel(==20)]-[_separatorView(==1)]-[_descriptionLabel(==DescriptionLabelHeight)][_seeMoreButton(==25)][_actionButton(==30)]-(>=0)-|" options:0 metrics:metrics views:constrainedViews]];
 	
 	[super updateConstraints];
 }
-
-//- (void)layoutSubviews
-//{
-//	[super layoutSubviews];
-//    
-//    // -- Gradient layer
-//    _gradientLayer.frame = self.bounds;
-//    // -- Sharing view
-//    self.sharingView.frame = CGRectMake(0, 0, CGRectGetWidth(self.bounds), CGRectGetHeight(self.bounds));
-//	// -- Title
-//    self.titleLabel.frame = CGRectMake(20, 30, CGRectGetWidth(self.bounds) - 40, 20);
-//	// -- Separator
-//    self.separatorView.frame = CGRectMake(20, CGRectGetMinY(self.titleLabel.frame) + CGRectGetHeight(self.titleLabel.frame), CGRectGetWidth(self.titleLabel.frame), 1);
-//    // -- Action
-//    self.actionButton.frame = CGRectMake(CGRectGetWidth(self.bounds) - 55 - 5, CGRectGetHeight(self.bounds) - 32 - 5, 55, 32);
-//    // -- See more
-//	self.seeMoreButton.frame = CGRectMake(CGRectGetWidth(self.bounds) - CGRectGetWidth(self.actionButton.frame) - 60 - 5, CGRectGetMinY(self.separatorView.frame) + CGRectGetHeight(self.separatorView.frame) + 5, 60, 20);
-//    // -- Description
-//    CGSize descriptionSize = [self p_sizeForDescriptionLabel];
-//    CGFloat descriptionHeight = 20;
-//	if (self.descriptionExpanded) {
-//		descriptionHeight = descriptionSize.height;
-//	}
-//    self.descriptionLabel.frame = CGRectMake(20, CGRectGetMinY(self.separatorView.frame) + CGRectGetHeight(self.separatorView.frame) + 5, descriptionSize.width, descriptionHeight);
-//    
-//    // -- Controls visibility
-//	if ([self.descriptionLabel.text length]) {
-//        self.descriptionLabel.hidden = NO;
-//        if (self.descriptionExpanded) {
-//            self.seeMoreButton.hidden = YES;
-//        } else {
-//            CGSize descriptionTextSize;
-//            if (floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_6_1) {
-//                descriptionTextSize = [self.descriptionLabel.text sizeWithFont:self.descriptionLabel.font  constrainedToSize:CGSizeMake(descriptionSize.width, MAXFLOAT)];
-//            } else {
-//                NSDictionary *textAttributes = @{NSFontAttributeName : self.descriptionLabel.font};
-//                CGRect descriptionBoundingRect = [self.descriptionLabel.text boundingRectWithSize:CGSizeMake(descriptionSize.width, MAXFLOAT)
-//                                                                                          options:NSStringDrawingUsesLineFragmentOrigin|NSStringDrawingUsesFontLeading attributes:textAttributes
-//                                                                                          context:nil];
-//                descriptionTextSize = CGSizeMake(ceil(CGRectGetWidth(descriptionBoundingRect)), ceil(CGRectGetHeight(descriptionBoundingRect)));
-//            }
-//            if (descriptionTextSize.height > CGRectGetHeight(self.descriptionLabel.frame)) {
-//                self.seeMoreButton.hidden = NO;
-//            } else {
-//                self.seeMoreButton.hidden = YES;
-//            }
-//        }
-//    } else {
-//        self.descriptionLabel.hidden = YES;
-//        self.seeMoreButton.hidden = YES;
-//    }
-//	
-//    if ([_title length]) {
-//		self.titleLabel.hidden = NO;
-//		self.separatorView.hidden = NO;
-//	} else {
-//		self.titleLabel.hidden = YES;
-//		self.separatorView.hidden = YES;
-//	}
-//    
-//    if (![_description length] && ![_title length]) {
-//        _gradientLayer.hidden = YES;
-//    } else {
-//        _gradientLayer.hidden = NO;
-//    }
-//}
-
-
 
 
 #pragma mark - Public methods
@@ -153,39 +92,34 @@
     self.visible = visible;
 }
 
-- (void)resetOverlayView
-{
-    self.descriptionExpanded = NO;
-    
-    UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
-    
-    CGRect frame = self.superview.frame;
-    CGRect overlayFrame = CGRectZero;
-    if (UIDeviceOrientationIsPortrait(orientation) || !UIDeviceOrientationIsLandscape(orientation)) {
-        overlayFrame = CGRectMake(0, CGRectGetHeight(frame) - AGPhotoBrowserOverlayInitialHeight, CGRectGetWidth(frame), AGPhotoBrowserOverlayInitialHeight);
-    } else if (orientation == UIDeviceOrientationLandscapeLeft) {
-        overlayFrame = CGRectMake(0, 0, AGPhotoBrowserOverlayInitialHeight, CGRectGetHeight(frame));
-    } else {
-        overlayFrame = CGRectMake(CGRectGetWidth(frame) - AGPhotoBrowserOverlayInitialHeight, 0, AGPhotoBrowserOverlayInitialHeight, CGRectGetHeight(frame));
-    }
-    
-    [UIView animateWithDuration:0.15
-                     animations:^(){
-                         self.frame = overlayFrame;
-                     }];
-}
+//- (void)resetOverlayView
+//{
+//    self.descriptionExpanded = NO;
+//    
+//    UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+//    
+//    CGRect frame = self.superview.frame;
+//    CGRect overlayFrame = CGRectZero;
+//    if (UIDeviceOrientationIsPortrait(orientation) || !UIDeviceOrientationIsLandscape(orientation)) {
+//        overlayFrame = CGRectMake(0, CGRectGetHeight(frame) - AGPhotoBrowserOverlayInitialHeight, CGRectGetWidth(frame), AGPhotoBrowserOverlayInitialHeight);
+//    } else if (orientation == UIDeviceOrientationLandscapeLeft) {
+//        overlayFrame = CGRectMake(0, 0, AGPhotoBrowserOverlayInitialHeight, CGRectGetHeight(frame));
+//    } else {
+//        overlayFrame = CGRectMake(CGRectGetWidth(frame) - AGPhotoBrowserOverlayInitialHeight, 0, AGPhotoBrowserOverlayInitialHeight, CGRectGetHeight(frame));
+//    }
+//    
+//    [UIView animateWithDuration:0.15
+//                     animations:^(){
+//                         self.frame = overlayFrame;
+//                     }];
+//}
 
 
 #pragma mark - Private methods
 
 - (CGSize)p_sizeForDescriptionLabel
 {
-    CGFloat newDescriptionWidth;
-    if (self.descriptionExpanded) {
-        newDescriptionWidth = CGRectGetWidth(self.bounds) - 20 - CGRectGetWidth(self.actionButton.frame) - 10; // H:|-(==20)-[_descriptionLabel]-(==5)-[_actionButton]-(==5)-|
-    } else {
-        newDescriptionWidth = CGRectGetWidth(self.bounds) - 20 - 5 - CGRectGetWidth(self.seeMoreButton.frame) - CGRectGetWidth(self.actionButton.frame) - 5; // H:|-(==20)-[_descriptionLabel]-(==5)-[_seeMoreButton][_actionButton]-(==5)-|
-    }
+    CGFloat newDescriptionWidth = CGRectGetWidth(self.bounds) - 2*20;
     
     CGSize descriptionSize;
     if (floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_6_1) {
@@ -215,32 +149,17 @@
 	if ([self.delegate respondsToSelector:@selector(sharingView:didTapOnSeeMoreButton:)]) {
 		[self.delegate sharingView:self didTapOnSeeMoreButton:sender];
 	}
-    
-    self.descriptionExpanded = YES;
+	
+    self.seeMoreButton.hidden = YES;
     
     CGSize newDescriptionSize = [self p_sizeForDescriptionLabel];
-    
-    CGRect currentOverlayFrame = self.frame;
-    UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
-    if (UIDeviceOrientationIsPortrait(orientation) || !UIDeviceOrientationIsLandscape(orientation)) {
-        int newSharingHeight = CGRectGetHeight(currentOverlayFrame) - 20 + newDescriptionSize.height;
-        currentOverlayFrame.size.height = newSharingHeight;
-        currentOverlayFrame.origin.y -= (newSharingHeight - CGRectGetHeight(self.bounds));
-    } else if (orientation == UIDeviceOrientationLandscapeLeft) {
-        int newSharingWidth = CGRectGetWidth(currentOverlayFrame) - 20 + newDescriptionSize.height;
-        currentOverlayFrame.size.width = newSharingWidth;
-    } else {
-        int newSharingWidth = CGRectGetWidth(currentOverlayFrame) - 20 + newDescriptionSize.height;
-        currentOverlayFrame.origin.x -= (newSharingWidth - CGRectGetWidth(currentOverlayFrame));
-        currentOverlayFrame.size.width = newSharingWidth;
-    }
-    
+	_descriptionLabelHeight = newDescriptionSize.height;
+	[self updateConstraints];
+
     [UIView animateWithDuration:AGPhotoBrowserAnimationDuration
                      animations:^(){
-                         self.frame = currentOverlayFrame;
+                         [self layoutIfNeeded];
                      }];
-    
-//    [self.sharingView addGestureRecognizer:self.tapGesture];
 }
 
 
@@ -249,14 +168,34 @@
 - (void)p_tapGestureTapped:(UITapGestureRecognizer *)recognizer
 {
 	self.visible = !self.visible;
-//	[self resetOverlayView];
+}
+
+- (void)p_resetGestureTapped:(UITapGestureRecognizer *)recognizer
+{
+	_descriptionLabelHeight = AGInitialDescriptionHeight;
+	[self updateConstraints];
+	
+	[UIView animateWithDuration:AGPhotoBrowserAnimationDuration
+					 animations:^{
+						 [self layoutIfNeeded];
+					 }
+					 completion:^(BOOL finished) {
+						 self.seeMoreButton.hidden = NO;
+					 }];
 }
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
 {
-	if ([self.sharingView pointInside:point withEvent:event]) {
+	if ([self.seeMoreButton pointInside:[self convertPoint:point toView:self.seeMoreButton] withEvent:event]) {
+        return self.seeMoreButton;
+    }
+	if ([self.actionButton pointInside:[self convertPoint:point toView:self.actionButton] withEvent:event]) {
+        return self.actionButton;
+    }
+	if ([self.sharingView pointInside:[self convertPoint:point toView:self.sharingView] withEvent:event]) {
         return self.sharingView;
     }
+	
     return nil;
 }
 
@@ -323,7 +262,7 @@
 		_separatorView = [[UIView alloc] initWithFrame:CGRectZero];
 		_separatorView.translatesAutoresizingMaskIntoConstraints = NO;
 		_separatorView.backgroundColor = [UIColor lightGrayColor];
-        _separatorView.hidden = YES;
+//        _separatorView.hidden = YES;
 	}
 	
 	return _separatorView;
@@ -347,11 +286,12 @@
 {
 	if (!_seeMoreButton) {
 		_seeMoreButton = [[UIButton alloc] initWithFrame:CGRectZero];
+		_seeMoreButton.translatesAutoresizingMaskIntoConstraints = NO;
 		[_seeMoreButton setTitle:NSLocalizedString(@"See More", @"Title for See more button") forState:UIControlStateNormal];
 		[_seeMoreButton setBackgroundColor:[UIColor clearColor]];
 		[_seeMoreButton setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
 		_seeMoreButton.titleLabel.font = [UIFont boldSystemFontOfSize:13];
-        _seeMoreButton.hidden = YES;
+//        _seeMoreButton.hidden = YES;
 		
 		[_seeMoreButton addTarget:self action:@selector(p_seeMoreButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
 	}
@@ -363,6 +303,7 @@
 {
 	if (!_actionButton) {
 		_actionButton = [[UIButton alloc] initWithFrame:CGRectZero];
+		_actionButton.translatesAutoresizingMaskIntoConstraints = NO;
 		[_actionButton setTitle:NSLocalizedString(@"● ● ●", @"Title for Action button") forState:UIControlStateNormal];
 		[_actionButton setBackgroundColor:[UIColor clearColor]];
 		[_actionButton setTitleColor:[UIColor colorWithWhite:0.9 alpha:0.9] forState:UIControlStateNormal];
@@ -383,6 +324,16 @@
 	}
 	
 	return _tapGesture;
+}
+
+- (UITapGestureRecognizer *)resetGesture
+{
+	if (!_resetGesture) {
+		_resetGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(p_resetGestureTapped:)];
+		_resetGesture.numberOfTouchesRequired = 1;
+	}
+	
+	return _resetGesture;
 }
 
 @end

@@ -153,11 +153,7 @@
 - (BOOL)photoBrowser:(AGPhotoBrowserView *)photoBrowser willDisplayActionButtonAtIndex:(NSInteger)index
 {
     // -- For testing purposes only
-    if (index % 2) {
-        return YES;
-    }
-    
-    return NO;
+	return index % 2 != 0;
 }
 
 
