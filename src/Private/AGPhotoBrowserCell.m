@@ -20,9 +20,9 @@
 
 @implementation AGPhotoBrowserCell
 
-- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+- (instancetype)initWithFrame:(CGRect)frame
 {
-	self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+	self = [super initWithFrame:frame];
 	if (self) {
 		[self p_setupCell];
 	}
@@ -34,6 +34,11 @@
 {
     self.contentView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 	[self.contentView addSubview:self.zoomableView];
+}
+
+- (void)prepareForReuse
+{
+	[super prepareForReuse];
 }
 
 + (BOOL)requiresConstraintBasedLayout

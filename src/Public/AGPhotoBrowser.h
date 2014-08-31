@@ -7,11 +7,12 @@
 //
 
 #import <UIKit/UIKit.h>
-
 #import "AGPhotoBrowserDelegate.h"
 #import "AGPhotoBrowserDataSource.h"
 
-@interface AGPhotoBrowserView : UIView
+#define AGPhotoBrowserVersion @"1.5.0"
+
+@interface AGPhotoBrowser : NSObject
 
 @property (nonatomic, weak) id<AGPhotoBrowserDelegate> delegate;
 @property (nonatomic, weak) id<AGPhotoBrowserDataSource> dataSource;
@@ -33,7 +34,7 @@
  *  @param animated YES to animate the transition with a fade-in effect, NO to make the transition immediate.
  *  @param completionBlock a completion block to be called when the animation is completed.
  */
-- (void)showAnimated:(BOOL)animated withCompletion:(void(^)(BOOL finished))completionBlock;
+- (void)showAnimated:(BOOL)animated completion:(void(^)(BOOL finished))completionBlock;
 
 /**
  *  Replaced by showFromIndex:animated:
@@ -52,7 +53,7 @@
  *  @param animated     YES to animate the transition with a fade-in effect, NO to make the transition immediate.
  *  @param completionBlock a completion block to be called when the animation is completed.
  */
-- (void)showFromIndex:(NSInteger)initialIndex animated:(BOOL)animated withCompletion:(void(^)(BOOL finished))completionBlock;
+- (void)showFromIndex:(NSInteger)initialIndex animated:(BOOL)animated completion:(void(^)(BOOL finished))completionBlock;
 
 /**
  *  Replaced by hideAnimated:withCompletion
@@ -67,6 +68,6 @@
  *  @param animated        YES to animate the transition with a fade-out effect, NO to make the transition immediate.
  *  @param completionBlock a completion block to be called when the animation is completed.
  */
-- (void)hideAnimated:(BOOL)animated withCompletion:(void(^)(BOOL finished))completionBlock;
+- (void)hideAnimated:(BOOL)animated completion:(void(^)(BOOL finished))completionBlock;
 
 @end

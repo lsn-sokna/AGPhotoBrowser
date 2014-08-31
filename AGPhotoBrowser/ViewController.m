@@ -8,7 +8,7 @@
 
 #import "ViewController.h"
 
-#import "AGPhotoBrowserView.h"
+#import "AGPhotoBrowser.h"
 
 #define SAMPLE_IMAGE_1			[UIImage imageNamed:@"sample1.jpg"]
 #define SAMPLE_IMAGE_2			[UIImage imageNamed:@"sample2.jpg"]
@@ -21,7 +21,7 @@
 }
 
 @property (nonatomic, weak) IBOutlet UITableView *tableView;
-@property (nonatomic, strong) AGPhotoBrowserView *browserView;
+@property (nonatomic, strong) AGPhotoBrowser *photoBrowser;
 
 @end
 
@@ -97,7 +97,7 @@
 #pragma mark - UITableView Delegate methods
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-	[self.browserView showFromIndex:indexPath.row animated:YES withCompletion:nil];
+	[self.photoBrowser showFromIndex:indexPath.row animated:YES completion:nil];
 }
 
 
@@ -123,34 +123,34 @@
 		[cell.contentView addSubview:titleLabel];
 	}
 	
-	titleLabel.text = [self photoBrowser:self.browserView titleForImageAtIndex:indexPath.row];
-	imageView.image = [self photoBrowser:self.browserView imageAtIndex:indexPath.row];
+	titleLabel.text = [self photoBrowser:self.photoBrowser titleForImageAtIndex:indexPath.row];
+	imageView.image = [self photoBrowser:self.photoBrowser imageAtIndex:indexPath.row];
 }
 
 
 #pragma mark - AGPhotoBrowser datasource
 
-- (NSInteger)numberOfPhotosForPhotoBrowser:(AGPhotoBrowserView *)photoBrowser
+- (NSInteger)numberOfPhotosForPhotoBrowser:(AGPhotoBrowser *)photoBrowser
 {
 	return _samplePictures.count;
 }
 
-- (UIImage *)photoBrowser:(AGPhotoBrowserView *)photoBrowser imageAtIndex:(NSInteger)index
+- (UIImage *)photoBrowser:(AGPhotoBrowser *)photoBrowser imageAtIndex:(NSInteger)index
 {
 	return [[_samplePictures objectAtIndex:index] objectForKey:@"Image"];
 }
 
-- (NSString *)photoBrowser:(AGPhotoBrowserView *)photoBrowser titleForImageAtIndex:(NSInteger)index
+- (NSString *)photoBrowser:(AGPhotoBrowser *)photoBrowser titleForImageAtIndex:(NSInteger)index
 {
 	return [[_samplePictures objectAtIndex:index] objectForKey:@"Title"];
 }
 
-- (NSString *)photoBrowser:(AGPhotoBrowserView *)photoBrowser descriptionForImageAtIndex:(NSInteger)index
+- (NSString *)photoBrowser:(AGPhotoBrowser *)photoBrowser descriptionForImageAtIndex:(NSInteger)index
 {
 	return [[_samplePictures objectAtIndex:index] objectForKey:@"Description"];
 }
 
-- (BOOL)photoBrowser:(AGPhotoBrowserView *)photoBrowser willDisplayActionButtonAtIndex:(NSInteger)index
+- (BOOL)photoBrowser:(AGPhotoBrowser *)photoBrowser willDisplayActionButtonAtIndex:(NSInteger)index
 {
     // -- For testing purposes only
 	return index % 2 != 0;
@@ -159,16 +159,16 @@
 
 #pragma mark - AGPhotoBrowser delegate
 
-- (void)photoBrowser:(AGPhotoBrowserView *)photoBrowser didTapOnDoneButton:(UIButton *)doneButton
+- (void)photoBrowser:(AGPhotoBrowser *)photoBrowser didTapOnDoneButton:(UIButton *)doneButton
 {
 	// -- Dismiss
 	NSLog(@"Dismiss the photo browser here");
-	[self.browserView hideAnimated:YES withCompletion:^(BOOL finished){
+	[self.photoBrowser hideAnimated:YES completion:^(BOOL finished){
 		NSLog(@"Dismissed!");
 	}];
 }
 
-- (void)photoBrowser:(AGPhotoBrowserView *)photoBrowser didTapOnActionButton:(UIButton *)actionButton atIndex:(NSInteger)index
+- (void)photoBrowser:(AGPhotoBrowser *)photoBrowser didTapOnActionButton:(UIButton *)actionButton atIndex:(NSInteger)index
 {
 	NSLog(@"Action button tapped at index %ld!", (long)index);
 	UIActionSheet *action = [[UIActionSheet alloc] initWithTitle:@""
@@ -182,15 +182,15 @@
 
 #pragma mark - Getters
 
-- (AGPhotoBrowserView *)browserView
+- (AGPhotoBrowser *)photoBrowser
 {
-	if (!_browserView) {
-		_browserView = [[AGPhotoBrowserView alloc] initWithFrame:CGRectZero];
-		_browserView.delegate = self;
-		_browserView.dataSource = self;
+	if (!_photoBrowser) {
+		_photoBrowser = [[AGPhotoBrowser alloc] init];
+		_photoBrowser.delegate = self;
+		_photoBrowser.dataSource = self;
 	}
 	
-	return _browserView;
+	return _photoBrowser;
 }
 
 

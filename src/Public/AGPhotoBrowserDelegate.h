@@ -8,12 +8,12 @@
 
 #import <Foundation/Foundation.h>
 
-@class AGPhotoBrowserView;
+@class AGPhotoBrowser;
 
 @protocol AGPhotoBrowserDelegate <NSObject>
 
 @optional
-- (void)photoBrowser:(AGPhotoBrowserView *)photoBrowser didTapOnDoneButton:(UIButton *)doneButton;
-- (void)photoBrowser:(AGPhotoBrowserView *)photoBrowser didTapOnActionButton:(UIButton *)actionButton atIndex:(NSInteger)index;
+- (void)photoBrowser:(AGPhotoBrowser *)photoBrowser didTapOnDoneButton:(UIButton *)doneButton;
+- (void)photoBrowser:(AGPhotoBrowser *)photoBrowser didTapOnActionButton:(UIButton *)actionButton atIndex:(NSInteger)index;
 
 @end
