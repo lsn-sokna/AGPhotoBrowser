@@ -124,7 +124,7 @@
 {
 	[self.zoomableView setImage:cellImage];
 	
-	[self setNeedsUpdateConstraints];
+	//[self setNeedsUpdateConstraints]; 
 }
 
 
